@@ -1,13 +1,12 @@
-
-
-
 <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#070b14">
-<title>AI Mediator & Multi-Engine Hub</title>
+<title>AI Mediator & Multi-Search</title>
+<!-- Added PDF.js for native browser PDF reading -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 <style>
 :root{
   --bg:#070b14;--panel:#0e1524;--panel2:#121c2f;--text:#eef4ff;--muted:#93a4bd;
@@ -39,7 +38,7 @@ textarea:focus,input:focus,select:focus{border-color:var(--accent)}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media(max-width:760px){.grid{grid-template-columns:1fr}}
 .engines{display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto;padding-right:4px}
-.enginerow{border:1px solid var(--line);border-radius:14px;padding:10px;background:#0a1220;display:flex;align-items:center;justify-space-between:space-between}
+.enginerow{border:1px solid var(--line);border-radius:14px;padding:10px;background:#0a1220;display:flex;align-items:center;justify-content:space-between}
 .enginetop{display:flex;align-items:center;gap:8px;flex:1}
 .enginename{font-weight:800;font-size:13px}
 .small{font-size:11px;color:var(--muted)}
@@ -73,8 +72,8 @@ hr{border:0;border-top:1px solid var(--line);margin:15px 0}
   <textarea id="prompt" placeholder="Ask a question or enter research prompt..."></textarea>
 
   <div class="file-box">
-    <label for="fileInput" class="file-label">📎 Attach File / Image</label>
-    <input type="file" id="fileInput" accept="image/*,.txt,.md,.json,.csv">
+    <label for="fileInput" class="file-label">📎 Attach File / PDF / Image</label>
+    <input type="file" id="fileInput" accept="image/*,.txt,.md,.json,.csv,.pdf">
     <span class="file-preview" id="fileName">No file attached</span>
   </div>
 
@@ -98,7 +97,7 @@ hr{border:0;border-top:1px solid var(--line);margin:15px 0}
     <div class="sectiontitle"><h3>⚙️ Direct API Setup (Optional)</h3></div>
     <label for="apiKey">OPENROUTER / DIRECT API KEY (For Auto-Mediator Synthesis)</label>
     <input type="password" id="apiKey" placeholder="sk-or-v1-...">
-    <div class="small" style="margin-top:6px;">If an API key is provided, the mediator will fetch parallel responses from all checked engines and automatically pick/synthesize the best result.</div>
+    <div class="small" style="margin-top:6px;">Provide an OpenRouter API key to automatically query and aggregate outputs across AI models. If omitted, launching direct search tabs is used automatically.</div>
   </div>
 </div>
 
@@ -139,6 +138,10 @@ hr{border:0;border-top:1px solid var(--line);margin:15px 0}
 (() => {
 "use strict";
 
+if (window.pdfjsLib) {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
+}
+
 const DEFAULT_ENGINES = [
   { id: "google", name: "Google", uri: "https://www.google.com/search?q={query}", modelId: "google/gemini-2.5-flash" },
   { id: "perplexity", name: "Perplexity AI", uri: "https://www.perplexity.ai/search?q={query}", modelId: "perplexity/sonar" },
@@ -164,19 +167,42 @@ function toast(msg){
   window.__toast = setTimeout(() => $("toast").classList.add("hidden"), 2800);
 }
 
-// File Attachment Handler
-$("fileInput").onchange = e => {
+// File Attachment Handler with PDF Support
+$("fileInput").onchange = async e => {
   const file = e.target.files[0];
   if (!file) return;
-  $("fileName").textContent = file.name;
+  $("fileName").textContent = file.name + " (Processing...)";
   
-  const reader = new FileReader();
-  if (file.type.startsWith("image/")) {
-    reader.onload = () => { attachedFileContent = `\n[Attached Image Data: ${reader.result.slice(0, 100)}...]`; };
-    reader.readAsDataURL(file);
-  } else {
-    reader.onload = () => { attachedFileContent = `\n[Attached File Context (${file.name}):\n${reader.result}\n]`; };
-    reader.readAsText(file);
+  try {
+    if (file.type === "application/pdf" || file.name.endsWith(".pdf")) {
+      const arrayBuffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      let fullText = "";
+      for (let i = 1; i <= Math.min(pdf.numPages, 10); i++) { // Parse up to first 10 pages
+        const page = await pdf.getPage(i);
+        const textContent = await page.getTextContent();
+        fullText += textContent.items.map(item => item.str).join(" ") + "\n";
+      }
+      attachedFileContent = `\n[Attached PDF Text (${file.name}):\n${fullText.slice(0, 4000)}\n]`;
+      $("fileName").textContent = file.name + " (PDF Loaded)";
+    } else if (file.type.startsWith("image/")) {
+      const reader = new FileReader();
+      reader.onload = () => { 
+        attachedFileContent = `\n[Attached Image Data Preview: ${reader.result.slice(0, 100)}...]`; 
+        $("fileName").textContent = file.name;
+      };
+      reader.readAsDataURL(file);
+    } else {
+      const reader = new FileReader();
+      reader.onload = () => { 
+        attachedFileContent = `\n[Attached File Context (${file.name}):\n${reader.result.slice(0, 4000)}\n]`; 
+        $("fileName").textContent = file.name;
+      };
+      reader.readAsText(file);
+    }
+  } catch(err) {
+    toast("Error reading file: " + err.message);
+    $("fileName").textContent = file.name + " (Failed)";
   }
 };
 
@@ -243,14 +269,14 @@ function launchDirect(){
   });
 
   $("results").classList.remove("hidden");
-  toast("Generated launch links.");
+  toast("Generated engine search links.");
 }
 
 // Mediator & AI Synthesis Mode
 async function runMediator(){
   const rawQuery = $("prompt").value.trim();
   if (!rawQuery) return toast("Enter a prompt first.");
-  
+
   const apiKey = $("apiKey").value.trim();
   const activeEngines = state.engines.filter((_, idx) => state.selected[idx]);
 
@@ -259,14 +285,14 @@ async function runMediator(){
   launchDirect();
 
   if (!apiKey) {
-    toast("Opening tabs... Add OpenRouter API key for auto-synthesis result!");
+    toast("No API Key provided. Opened direct search tabs below!");
     return;
   }
 
   $("synthesisResult").classList.remove("hidden");
-  $("synthesisText").textContent = "📡 Querying selected AI engines concurrently...";
+  $("synthesisText").textContent = "📡 Querying selected AI models concurrently...";
 
-  const fullQuery = rawQuery + (attachedFileContent ? `\nContext File: ${attachedFileContent}` : "");
+  const fullQuery = rawQuery + attachedFileContent;
 
   try {
     const enginePromises = activeEngines.map(async (eng) => {
@@ -293,7 +319,6 @@ async function runMediator(){
 
     $("synthesisText").textContent = "⚖️ Mediator evaluating responses for accuracy...";
 
-    // Mediator Evaluation Call
     const synthRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -319,7 +344,6 @@ async function runMediator(){
   }
 }
 
-// Event Bindings
 $("launchAllBtn").onclick = launchDirect;
 $("mediatorBtn").onclick = runMediator;
 $("clearBtn").onclick = () => {
@@ -358,5 +382,3 @@ renderEngines();
 </script>
 </body>
 </html>
-
-```
