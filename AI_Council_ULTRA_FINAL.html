@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#070b14">
-<title>AI Mediator & Problem Analyzer</title>
+<title>AI Mediator & Multi-Search</title>
 <!-- PDF.js library for in-browser PDF text extraction -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 <style>
@@ -34,9 +34,13 @@ textarea:focus,input:focus,select:focus{border-color:var(--accent)}
 .actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}
 .primary{border:0;background:linear-gradient(135deg,#7c5cff,#6045df);color:#fff;border-radius:14px;padding:14px 20px;font-weight:800;flex:1;min-width:200px}
 .secondary{border:1px solid var(--line);background:#0a1220;color:#fff;border-radius:14px;padding:13px 16px}
-.engine-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-top:10px}
-.engine-checkbox{display:flex;align-items:center;gap:8px;background:#09111f;padding:10px 14px;border-radius:12px;border:1px solid var(--line);font-size:13px}
+.danger-btn{border:1px solid var(--danger);background:rgba(255,93,115,0.1);color:var(--danger);border-radius:8px;padding:4px 8px;font-size:11px;cursor:pointer}
+.engine-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin-top:10px}
+.engine-checkbox{display:flex;align-items:center;justify-content:space-between;background:#09111f;padding:10px 14px;border-radius:12px;border:1px solid var(--line);font-size:13px}
+.engine-checkbox-left{display:flex;align-items:center;gap:8px}
 .engine-checkbox input{width:auto;margin:0}
+.add-engine-row{display:flex;gap:8px;margin-top:12px}
+.add-engine-row input{padding:9px 12px;font-size:12px}
 .hidden{display:none!important}
 .synthesis-card{border:2px solid var(--accent2);background:#0b1b22;border-radius:16px;padding:20px;margin-top:20px}
 .synthesis-card h3{color:var(--accent2);margin-top:0}
@@ -50,7 +54,7 @@ textarea:focus,input:focus,select:focus{border-color:var(--accent)}
 <header>
   <div class="brand">
     <div class="logo">⚖️</div>
-    <div><h1>AI Mediator & Multi-Search</h1><div class="sub">Groq Llama 3 Powered • Automated Problem Synthesis</div></div>
+    <div><h1>AI Mediator & Multi-Search</h1><div class="sub">Groq Powered • Unlimited Multi-Engine Integration</div></div>
   </div>
 </header>
 
@@ -66,18 +70,22 @@ textarea:focus,input:focus,select:focus{border-color:var(--accent)}
 
   <div class="actions">
     <button class="primary" id="mediatorBtn">🧠 RUN MEDIATOR (GROQ SYNTHESIS)</button>
-    <button class="secondary" id="openTabsBtn">🚀 Open Search Tabs Direct</button>
+    <button class="secondary" id="openTabsBtn">🚀 Open All Selected Search Tabs</button>
     <button class="secondary" id="clearBtn">Clear</button>
   </div>
 </div>
 
+<!-- UNLIMITED SEARCH ENGINES SECTION -->
 <div class="card">
-  <label>SELECT SEARCH ENGINES FOR DIRECT OPENING</label>
-  <div class="engine-grid">
-    <label class="engine-checkbox"><input type="checkbox" id="engineGoogle" checked> Google Search</label>
-    <label class="engine-checkbox"><input type="checkbox" id="enginePerplexity" checked> Perplexity AI</label>
-    <label class="engine-checkbox"><input type="checkbox" id="engineChatGPT" checked> ChatGPT</label>
-    <label class="engine-checkbox"><input type="checkbox" id="engineDDG" checked> DuckDuckGo</label>
+  <label>SELECT / ADD SEARCH ENGINES (UNLIMITED)</label>
+  <div class="engine-grid" id="engineGrid">
+    <!-- Search engine checkboxes render dynamically here -->
+  </div>
+
+  <div class="add-engine-row">
+    <input type="text" id="newEngineName" placeholder="Engine Name (e.g. Bing)">
+    <input type="text" id="newEngineUrl" placeholder="Search URL with query parameter (e.g. https://www.bing.com/search?q=)">
+    <button class="secondary" id="addEngineBtn" style="white-space:nowrap;">+ Add Engine</button>
   </div>
 </div>
 
@@ -85,8 +93,8 @@ textarea:focus,input:focus,select:focus{border-color:var(--accent)}
   <label for="groqModel">SELECT GROQ MODEL (100% FREE)</label>
   <select id="groqModel" style="margin-bottom: 12px;">
     <option value="llama-3.3-70b-versatile" selected>Llama 3.3 70B Versatile (Recommended)</option>
-    <option value="llama3-8b-8192">Llama 3 8B (Fast)</option>
     <option value="mixtral-8x7b-32768">Mixtral 8x7b (Large Context)</option>
+    <option value="gemma2-9b-it">Gemma 2 9B</option>
   </select>
 
   <label for="apiKey">FREE GROQ API KEY</label>
@@ -115,11 +123,95 @@ let attachedFileContent = "";
 
 const $ = id => document.getElementById(id);
 
+// Default Unlimited Engines state
+const defaultEngines = [
+  { id: 'google', name: 'Google Search', url: 'https://www.google.com/search?q=', enabled: true },
+  { id: 'perplexity', name: 'Perplexity AI', url: 'https://www.perplexity.ai/search?q=', enabled: true },
+  { id: 'chatgpt', name: 'ChatGPT', url: 'https://chatgpt.com/?q=', enabled: true },
+  { id: 'ddg', name: 'DuckDuckGo', url: 'https://duckduckgo.com/?q=', enabled: true },
+  { id: 'github', name: 'GitHub Code', url: 'https://github.com/search?q=', enabled: false },
+  { id: 'phind', name: 'Phind AI', url: 'https://www.phind.com/search?q=', enabled: false }
+];
+
+let customEngines = JSON.parse(localStorage.getItem('user_search_engines')) || defaultEngines;
+
+function saveEngines() {
+  localStorage.setItem('user_search_engines', JSON.stringify(customEngines));
+}
+
+function renderEngines() {
+  const container = $("engineGrid");
+  container.innerHTML = "";
+  
+  customEngines.forEach((engine, index) => {
+    const card = document.createElement("div");
+    card.className = "engine-checkbox";
+    card.innerHTML = `
+      <div class="engine-checkbox-left">
+        <input type="checkbox" id="engine_chk_${index}" ${engine.enabled ? 'checked' : ''}>
+        <label for="engine_chk_${index}" style="margin:0;cursor:pointer;">${engine.name}</label>
+      </div>
+      <button class="danger-btn" data-index="${index}">✕</button>
+    `;
+
+    card.querySelector('input').onchange = (e) => {
+      customEngines[index].enabled = e.target.checked;
+      saveEngines();
+    };
+
+    card.querySelector('.danger-btn').onclick = () => {
+      customEngines.splice(index, 1);
+      saveEngines();
+      renderEngines();
+    };
+
+    container.appendChild(card);
+  });
+}
+
 function toast(msg){
   $("toast").textContent = msg;
   $("toast").classList.remove("hidden");
   clearTimeout(window.__toast);
   window.__toast = setTimeout(() => $("toast").classList.add("hidden"), 3000);
+}
+
+// Add New Engine Dynamically
+$("addEngineBtn").onclick = () => {
+  const name = $("newEngineName").value.trim();
+  const url = $("newEngineUrl").value.trim();
+
+  if (!name || !url) return toast("Provide both engine name and query URL.");
+
+  customEngines.push({
+    id: 'custom_' + Date.now(),
+    name: name,
+    url: url,
+    enabled: true
+  });
+
+  saveEngines();
+  renderEngines();
+
+  $("newEngineName").value = "";
+  $("newEngineUrl").value = "";
+  toast(`Added engine: ${name}`);
+};
+
+// Open Selected Search Tabs
+function openSearchTabs() {
+  const query = encodeURIComponent($("prompt").value.trim());
+  if (!query) return toast("Enter a prompt first to search across engines.");
+
+  let openedCount = 0;
+  customEngines.forEach(engine => {
+    if (engine.enabled) {
+      window.open(`${engine.url}${query}`, '_blank');
+      openedCount++;
+    }
+  });
+
+  if (openedCount === 0) toast("Select at least one search engine checkbox.");
 }
 
 // Extract PDF text directly in-browser
@@ -158,17 +250,6 @@ $("fileInput").onchange = async e => {
   }
 };
 
-// Open Selected Engines in Web Tabs
-function openSearchTabs() {
-  const query = encodeURIComponent($("prompt").value.trim());
-  if (!query) return toast("Enter a prompt first to search across engines.");
-
-  if ($("engineGoogle").checked) window.open(`https://www.google.com/search?q=${query}`, '_blank');
-  if ($("enginePerplexity").checked) window.open(`https://www.perplexity.ai/search?q=${query}`, '_blank');
-  if ($("engineChatGPT").checked) window.open(`https://chatgpt.com/?q=${query}`, '_blank');
-  if ($("engineDDG").checked) window.open(`https://duckduckgo.com/?q=${query}`, '_blank');
-}
-
 // Execute Direct AI Synthesis via Groq API
 async function runMediator() {
   const rawQuery = $("prompt").value.trim();
@@ -198,7 +279,7 @@ async function runMediator() {
         messages: [
           { 
             role: "system", 
-            content: "You are an expert hackathon advisor and technical evaluator. Analyze the user prompt and any provided catalogue content concisely and give actionable recommendations." 
+            content: "You are an expert hackathon advisor and technical evaluator. Analyze the prompt and catalogue data accurately." 
           },
           { 
             role: "user", 
@@ -238,6 +319,9 @@ $("clearBtn").onclick = () => {
 // Load saved key from localStorage
 $("apiKey").value = localStorage.getItem("free_groq_key") || "";
 $("apiKey").onchange = e => localStorage.setItem("free_groq_key", e.target.value.trim());
+
+// Initialize engines list
+renderEngines();
 
 })();
 </script>
