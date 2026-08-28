@@ -1,0 +1,696 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#070b14">
+<title>AI Council ULTRA FINAL</title>
+<style>
+:root{
+  --bg:#070b14;--panel:#0e1524;--panel2:#121c2f;--text:#eef4ff;--muted:#93a4bd;
+  --line:#22304a;--accent:#7c5cff;--accent2:#19d3ae;--danger:#ff5d73;--warn:#ffc857;
+  --shadow:0 16px 45px rgba(0,0,0,.32);--radius:20px
+}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(circle at 20% -10%,#18234b 0,transparent 35%),var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+.app{max-width:1100px;margin:auto;padding:18px 14px 50px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
+.brand{display:flex;align-items:center;gap:11px}
+.logo{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(135deg,#7c5cff,#19d3ae);font-size:24px;box-shadow:var(--shadow)}
+h1{font-size:21px;margin:0}.sub{color:var(--muted);font-size:12px;margin-top:2px}
+.iconbtn{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:13px;padding:10px 12px}
+.card{background:rgba(14,21,36,.94);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:17px;margin-bottom:14px}
+label{display:block;font-size:12px;color:var(--muted);font-weight:700;margin:0 0 8px}
+textarea,input,select{width:100%;background:#09111f;color:var(--text);border:1px solid var(--line);border-radius:14px;outline:none;padding:13px}
+textarea{min-height:135px;resize:vertical}
+textarea:focus,input:focus,select:focus{border-color:var(--accent)}
+.modes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
+.mode{padding:11px;border:1px solid var(--line);background:#0a1220;color:var(--muted);border-radius:14px;text-align:center}
+.mode.active{background:rgba(124,92,255,.16);border-color:var(--accent);color:#fff}
+.actions{display:flex;gap:9px;flex-wrap:wrap}
+.primary{border:0;background:linear-gradient(135deg,#7c5cff,#6045df);color:#fff;border-radius:14px;padding:13px 18px;font-weight:800;flex:1;min-width:180px}
+.secondary{border:1px solid var(--line);background:#0a1220;color:#fff;border-radius:14px;padding:13px 16px}
+.danger{border-color:#5b2230;color:#ff9aaa}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:760px){.grid{grid-template-columns:1fr}.modes{grid-template-columns:1fr 1fr 1fr}}
+.status{display:flex;align-items:center;gap:9px;padding:11px 13px;border-radius:13px;background:#09111f;border:1px solid var(--line);color:var(--muted);font-size:13px}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--muted)}.dot.ok{background:var(--accent2)}.dot.busy{background:var(--warn);box-shadow:0 0 12px var(--warn)}
+.models{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.modelrow{border:1px solid var(--line);border-radius:14px;padding:10px;background:#0a1220}
+.modeltop{display:flex;align-items:center;gap:8px}.modeltop input{width:auto}.modelname{font-weight:800;font-size:13px}.slug{font-size:10px;color:var(--muted);margin-top:4px;word-break:break-all}
+.small{font-size:11px;color:var(--muted)}
+.progress{height:9px;border-radius:20px;background:#080e19;overflow:hidden;border:1px solid var(--line);margin-top:10px}.bar{height:100%;width:0;background:linear-gradient(90deg,#7c5cff,#19d3ae);transition:width .3s}
+.hidden{display:none!important}
+.verdict{border:1px solid rgba(25,211,174,.35);background:linear-gradient(180deg,rgba(25,211,174,.08),rgba(124,92,255,.05));}
+.verdict h2{margin:0 0 5px;font-size:18px}.winner{font-size:25px;font-weight:900;margin:8px 0}.confidence{font-size:13px;color:#aaf4e5}
+.pills{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}.pill{border:1px solid var(--line);border-radius:999px;padding:6px 9px;font-size:11px;color:var(--muted)}
+.sectiontitle{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.sectiontitle h3{margin:0;font-size:15px}
+.answer{border:1px solid var(--line);border-radius:15px;margin:9px 0;overflow:hidden;background:#0a1220}
+.answerhead{padding:11px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;background:#0c1627}
+.answerbody{padding:12px;color:#dfe8f7;font-size:13px;line-height:1.55;white-space:pre-wrap;max-height:360px;overflow:auto}
+.score{font-weight:900;color:#b9a9ff}
+.historyitem{border:1px solid var(--line);border-radius:13px;padding:11px;margin:7px 0;background:#0a1220}
+.historyitem button{background:none;border:0;color:#fff;text-align:left;width:100%}
+kbd{background:#111b2d;border:1px solid var(--line);padding:2px 6px;border-radius:6px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.68);display:flex;align-items:flex-end;justify-content:center;padding:10px;z-index:50}
+.modalbox{width:min(700px,100%);max-height:90vh;overflow:auto;background:#0c1423;border:1px solid var(--line);border-radius:22px;padding:17px}
+.modalhead{display:flex;justify-content:space-between;align-items:center}.modalhead h2{margin:0}
+hr{border:0;border-top:1px solid var(--line);margin:15px 0}
+.notice{font-size:11px;line-height:1.5;color:#9fb0c9}
+a{color:#a99bff}
+footer{text-align:center;color:#667894;font-size:10px;padding:12px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#111b2d;border:1px solid var(--line);padding:10px 14px;border-radius:12px;z-index:100;box-shadow:var(--shadow);font-size:12px}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="brand">
+    <div class="logo">🧠</div>
+    <div><h1>AI Council ULTRA FINAL</h1><div class="sub">Large PDFs • 7-model council • zero-credit fallback • mobile safe</div></div>
+  </div>
+  <button class="iconbtn" id="settingsBtn">⚙️</button>
+</header>
+
+<div class="card">
+  <label for="prompt">YOUR PROMPT</label>
+  <textarea id="prompt" placeholder="Example: Which SIH problem statement should my team choose and why?"></textarea>
+
+  <div style="margin-top:10px">
+    <label for="pdfFile">📄 ATTACH PDF (OPTIONAL)</label>
+    <input id="pdfFile" type="file" accept="application/pdf" />
+    <div class="small" id="pdfStatus" style="margin-top:7px">No PDF attached.</div>
+    <div class="notice" style="margin-top:8px">🧠 ULTRA mode never sends the whole PDF to the final judge. It scans the document in safe chunks, builds a compact evidence dossier, then sends that dossier to the council.</div>
+    <div class="notice" style="margin-top:8px">💰 <b>Zero-credit protection:</b> this build prefers free OpenRouter models, runs requests sequentially to prevent in-flight credit failures, retries rate limits, and automatically falls back when a model is unavailable.</div>
+  </div>
+
+  <div class="modes">
+    <button class="mode active" data-mode="quick">⚡ Quick</button>
+    <button class="mode" data-mode="deep">🔬 Deep</button>
+    <button class="mode" data-mode="decision">🏆 Decision</button>
+  </div>
+
+  <div class="actions">
+    <button class="primary" id="askBtn">⚡ ASK THE COUNCIL</button>
+    <button class="secondary" id="clearBtn">Clear</button>
+  </div>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <div class="sectiontitle"><h3>🤖 Council Members</h3><span class="small" id="modelCount">0 selected</span></div>
+    <div class="models" id="models"></div>
+    <div style="margin-top:10px" class="small">The labels represent model roles. They are not direct control of the Android apps installed on your phone.</div>
+  </div>
+
+  <div class="card">
+    <div class="sectiontitle"><h3>📡 Council Status</h3><span class="small" id="elapsed">—</span></div>
+    <div class="status"><span class="dot" id="dot"></span><span id="status">Ready. Add your OpenRouter key in ⚙️.</span></div>
+    <div class="progress"><div class="bar" id="bar"></div></div>
+    <div style="margin-top:10px" class="small" id="progressText">No run yet.</div>
+  </div>
+</div>
+
+<section id="results" class="hidden">
+  <div class="card verdict" id="verdictCard"></div>
+  <div class="card" id="debateCard"></div>
+  <div class="card">
+    <div class="sectiontitle"><h3>📊 Model Responses</h3><button class="secondary" id="copyAll">Copy</button></div>
+    <div id="answers"></div>
+  </div>
+</section>
+
+<div class="card">
+  <div class="sectiontitle"><h3>🕘 History</h3><button class="secondary" id="clearHistory">Clear</button></div>
+  <div id="history"></div>
+</div>
+
+<footer>AI Council is a personal multi-model client. Free providers may have separate logging/data policies. Do not upload confidential information to free endpoints. AI outputs can be wrong; verify important decisions.</footer>
+</div>
+
+<div class="modal hidden" id="settingsModal">
+ <div class="modalbox">
+  <div class="modalhead"><h2>⚙️ Settings</h2><button class="iconbtn" id="closeSettings">✕</button></div>
+  <hr>
+  <label for="apiKey">OPENROUTER API KEY</label>
+  <input id="apiKey" type="password" placeholder="sk-or-v1-...">
+  <div style="margin-top:8px" class="notice">
+    For this single-file build, the key is used from the browser/WebView. It is safer to keep it for the current session only. If you enable saving, it is stored in localStorage on this device. Never paste a key into public code or GitHub.
+  </div>
+  <div style="margin-top:10px">
+    <label><input type="checkbox" id="saveKey" style="width:auto"> Save key on this device</label>
+  </div>
+
+  <hr>
+  <label>JUDGE MODEL</label>
+  <select id="judgeModel"></select>
+
+  <label style="margin-top:12px">DEVIL'S ADVOCATE</label>
+  <select id="criticModel"></select>
+
+  <label style="margin-top:12px">PDF DOCUMENT SCANNER</label>
+  <select id="docModel"></select>
+  <div class="notice" style="margin-top:7px">For large PDFs, this model scans safe-size chunks and extracts only decision-critical evidence. Gemini 2.5 Flash is a good low-cost default.</div>
+
+  <hr>
+  <label>ZERO-CREDIT / AUTO-FALLBACK</label>
+  <label><input type="checkbox" id="safeBudget" style="width:auto"> Prefer free models and automatically replace paid/unavailable models</label>
+  <div class="notice" style="margin-top:6px">Recommended for your current account. Free OpenRouter models do not consume paid credits, but they are rate-limited.</div>
+
+  <hr>
+  <label>CUSTOM MODEL SLUGS</label>
+  <div class="notice">One OpenRouter model slug per line. These are added to the council list.</div>
+  <textarea id="customModels" style="min-height:100px" placeholder="provider/model-slug"></textarea>
+
+  <div class="actions" style="margin-top:12px">
+    <button class="primary" id="saveSettings">Save settings</button>
+    <button class="secondary" id="loadModels">Refresh model catalog</button>
+  </div>
+  <div id="catalogStatus" class="small" style="margin-top:8px"></div>
+  <hr>
+  <div class="notice">
+    OpenRouter exposes an OpenAI-compatible chat endpoint and a model catalog. This app uses that unified endpoint so one key can access many models. Usage is billed by OpenRouter according to the selected models.
+  </div>
+ </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+(() => {
+"use strict";
+
+const OR_URL = "https://openrouter.ai/api/v1/chat/completions";
+const MODELS_URL = "https://openrouter.ai/api/v1/models";
+
+const DEFAULT_MODELS = [
+  {id:"tencent/hy3:free", name:"Hy3", role:"Reasoning / long-context"},
+  {id:"google/gemma-4-31b-it:free", name:"Gemma 4", role:"Independent analysis"},
+  {id:"openai/gpt-oss-20b:free", name:"GPT OSS", role:"General reasoning"},
+  {id:"nvidia/nemotron-3-ultra-550b-a55b:free", name:"Nemotron Ultra", role:"Deep reasoning"},
+  {id:"nvidia/nemotron-nano-9b-v2:free", name:"Nemotron Nano", role:"Fast analysis"},
+  {id:"meta-llama/llama-3.3-70b-instruct:free", name:"Llama 3.3", role:"Alternative viewpoint"},
+  {id:"qwen/qwen3-next-80b-a3b-instruct:free", name:"Qwen3 Next", role:"Breadth / critic"}
+];
+const FREE_FALLBACKS = DEFAULT_MODELS.map(x=>x.id);
+const DEFAULT_JUDGE = "google/gemma-4-31b-it:free";
+const DEFAULT_CRITIC = "openai/gpt-oss-20b:free";
+const DEFAULT_DOC = "tencent/hy3:free";
+
+
+// If the previous build stored the old paid 7-model defaults, reset the default council to
+// the free-first set. Custom model lists are preserved when they differ.
+try{
+  const oldIds=[
+    "openai/gpt-5.4","google/gemini-2.5-pro","anthropic/claude-sonnet-4.6",
+    "perplexity/sonar","x-ai/grok-4","deepseek/deepseek-chat","qwen/qwen3-235b-a22b"
+  ];
+  const stored=JSON.parse(localStorage.getItem("ac_models")||"null");
+  if(Array.isArray(stored) && stored.length===oldIds.length && stored.every((m,i)=>m?.id===oldIds[i])){
+    localStorage.setItem("ac_models",JSON.stringify(DEFAULT_MODELS));
+    localStorage.setItem("ac_selected",JSON.stringify(DEFAULT_MODELS.map(()=>true)));
+  }
+}catch(_){}
+
+// Migrate model IDs from the first build if they were saved on this device.
+try {
+  const oldModels = JSON.parse(localStorage.getItem("ac_models") || "null");
+  if (Array.isArray(oldModels)) {
+    const migrations = {
+      "openai/gpt-5.3-chat":"openai/gpt-5.4",
+      "anthropic/claude-sonnet-4":"anthropic/claude-sonnet-4.6"
+    };
+    let changed = false;
+    for (const m of oldModels) {
+      if (m && migrations[m.id]) { m.id = migrations[m.id]; changed = true; }
+    }
+    if (changed) localStorage.setItem("ac_models", JSON.stringify(oldModels));
+  }
+  const oldJudge = localStorage.getItem("ac_judge");
+  if (oldJudge === "openai/gpt-5.3-chat" || oldJudge === "openai/gpt-5.4") localStorage.setItem("ac_judge",DEFAULT_JUDGE);
+  const oldCritic = localStorage.getItem("ac_critic");
+  if (oldCritic === "anthropic/claude-sonnet-4" || oldCritic === "anthropic/claude-sonnet-4.6") localStorage.setItem("ac_critic",DEFAULT_CRITIC);
+  if (!localStorage.getItem("ac_doc")) localStorage.setItem("ac_doc",DEFAULT_DOC);
+} catch (_) {}
+
+const state = {
+  mode:"quick",
+  models: JSON.parse(localStorage.getItem("ac_models") || "null") || DEFAULT_MODELS,
+  selected: JSON.parse(localStorage.getItem("ac_selected") || "null") || DEFAULT_MODELS.map((_,i)=>i<4),
+  key: "",
+  judge: localStorage.getItem("ac_judge") || DEFAULT_JUDGE,
+  critic: localStorage.getItem("ac_critic") || DEFAULT_CRITIC,
+  docModel: localStorage.getItem("ac_doc") || DEFAULT_DOC,
+  safeBudget: localStorage.getItem("ac_safe") !== "0",
+  running:false,
+  last:null,
+  pdfText:"",
+  pdfName:"",
+  pdfPages:[]
+};
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
+function toast(msg){$("toast").textContent=msg;$("toast").classList.remove("hidden");clearTimeout(window.__toast);window.__toast=setTimeout(()=>$("toast").classList.add("hidden"),2800);}
+function saveSettingsLocal(){
+  localStorage.setItem("ac_models",JSON.stringify(state.models));
+  localStorage.setItem("ac_selected",JSON.stringify(state.selected));
+  localStorage.setItem("ac_judge",state.judge);
+  localStorage.setItem("ac_critic",state.critic);
+  localStorage.setItem("ac_doc",state.docModel);
+  localStorage.setItem("ac_safe",state.safeBudget?"1":"0");
+}
+function getKey(){
+  return state.key || sessionStorage.getItem("ac_key") || localStorage.getItem("ac_key") || "";
+}
+function setKey(k,save){
+  state.key=k.trim();
+  sessionStorage.setItem("ac_key",state.key);
+  if(save && state.key) localStorage.setItem("ac_key",state.key);
+  else localStorage.removeItem("ac_key");
+}
+function renderModels(){
+  const box=$("models"); box.innerHTML="";
+  state.models.forEach((m,i)=>{
+    const row=document.createElement("div"); row.className="modelrow";
+    row.innerHTML=`<div class="modeltop"><input type="checkbox" data-i="${i}" ${state.selected[i]?"checked":""}><span class="modelname">${esc(m.name)}</span></div><div class="slug">${esc(m.id)}</div><div class="small">${esc(m.role||"")}</div>`;
+    box.appendChild(row);
+  });
+  box.querySelectorAll("input").forEach(x=>x.onchange=()=>{
+    state.selected[+x.dataset.i]=x.checked;
+    localStorage.setItem("ac_selected",JSON.stringify(state.selected));
+    updateCount();
+  });
+  updateCount();
+}
+function updateCount(){ $("modelCount").textContent=state.selected.filter(Boolean).length+" selected"; }
+function populateSelects(){
+  const ids=[...new Set([...state.models.map(m=>m.id),state.judge,state.critic,state.docModel])];
+  const configs=[[$("judgeModel"),state.judge],[$("criticModel"),state.critic],[$("docModel"),state.docModel]];
+  for(const [el,val] of configs){
+    el.innerHTML=ids.map(id=>`<option value="${esc(id)}">${esc(id)}</option>`).join("");
+    el.value=val;
+  }
+}
+function loadInitial(){
+  const k=getKey(); if(k){state.key=k;$("apiKey").value=k;$("saveKey").checked=!!localStorage.getItem("ac_key");}
+  renderModels(); populateSelects(); if($("safeBudget")) $("safeBudget").checked=state.safeBudget; renderHistory();
+}
+function setProgress(p,text,busy=true){
+  $("bar").style.width=p+"%";$("progressText").textContent=text;
+  $("dot").className="dot "+(busy?"busy":"ok");
+}
+function resetProgress(){setProgress(0,"No run yet.",false);$("status").textContent="Ready.";$("elapsed").textContent="—";}
+function modelSystem(mode, role){
+  const base=`You are one independent member of an AI Council. User asks a question.
+Answer the user's actual question directly. Do not blindly agree with other AIs because you have not seen them.
+Be explicit about assumptions, uncertainty, trade-offs and important missing information.
+Do not invent sources, facts, prices, statistics or citations.
+Your role: ${role}.`;
+  if(mode==="decision") return base+"\nThis is DECISION mode: compare realistic options and finish with a clear recommendation plus reasons.";
+  if(mode==="deep") return base+"\nThis is DEEP mode: prioritize careful analysis, evidence quality, contradictions and edge cases.";
+  return base+"\nThis is QUICK mode: be concise but accurate.";
+}
+function isFreeModel(id){
+  return id==="openrouter/free" || String(id||"").endsWith(":free");
+}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+function freeFallbackFor(index=0){
+  return FREE_FALLBACKS[index % FREE_FALLBACKS.length];
+}
+async function callModel(model, prompt, system, maxTokens=300, opts={}){
+  const key=getKey();
+  if(!key) throw new Error("Missing OpenRouter API key.");
+  let actualModel=model;
+  if(state.safeBudget && !isFreeModel(actualModel)) actualModel=freeFallbackFor(opts.fallbackIndex||0);
+
+  let requested=Math.max(120, Math.min(600, Math.floor(maxTokens)));
+  let lastErr="";
+  for(let attempt=0;attempt<4;attempt++){
+    let res, data;
+    try{
+      res=await fetch(OR_URL,{
+        method:"POST",
+        headers:{
+          "Authorization":"Bearer "+key,
+          "Content-Type":"application/json",
+          "HTTP-Referer":location.href.startsWith("http")?location.href:"",
+          "X-Title":"AI Council ULTRA FINAL"
+        },
+        body:JSON.stringify({
+          model:actualModel,
+          messages:[{role:"system",content:system},{role:"user",content:prompt}],
+          temperature:0.15,
+          max_tokens:requested
+        })
+      });
+      data=await res.json().catch(()=>({}));
+    }catch(e){
+      lastErr=e.message||"Network error";
+      if(attempt<3){await sleep(1200*(attempt+1));continue;}
+      throw new Error(lastErr);
+    }
+    if(res.ok){
+      const text=data?.choices?.[0]?.message?.content || "";
+      if(!text) throw new Error("Model returned an empty response.");
+      return {text,model:actualModel};
+    }
+
+    const msg=data?.error?.message || ("HTTP "+res.status);
+    lastErr=msg;
+
+    // Credit/in-flight failures: switch immediately to a free fallback when safe mode is on.
+    if(state.safeBudget && /credit|in-flight|afford|balance/i.test(msg) && !isFreeModel(actualModel)){
+      actualModel=freeFallbackFor(opts.fallbackIndex||attempt);
+      await sleep(500);
+      continue;
+    }
+
+    // Free endpoints and transient providers can be rate limited.
+    if(res.status===429 || res.status===408 || res.status>=500 || /rate limit|too many requests|temporarily|in-flight/i.test(msg)){
+      if(attempt<3){await sleep(1500*Math.pow(2,attempt));continue;}
+    }
+
+    // Paid-mode affordability retry.
+    const m=msg.match(/can only afford\s+(\d+)/i);
+    if(m && !state.safeBudget){
+      const affordable=Number(m[1]);
+      if(Number.isFinite(affordable) && affordable>=80 && affordable<requested){
+        requested=Math.max(80,Math.min(requested-20,affordable-10));
+        continue;
+      }
+    }
+    throw new Error(msg);
+  }
+  throw new Error(lastErr||"Model request failed.");
+}
+async function parallelLimit(tasks, limit=1){
+  const out=new Array(tasks.length); let next=0;
+  async function worker(){
+    while(true){
+      const i=next++; if(i>=tasks.length)return;
+      try{out[i]=await tasks[i]();}catch(e){out[i]={error:e.message};}
+    }
+  }
+  await Promise.all(Array.from({length:Math.min(Math.max(1,limit),tasks.length)},worker));
+  return out;
+}
+function extractJson(text){
+  let s=(text||"").trim();
+  s=s.replace(/^```json\s*/i,"").replace(/^```\s*/i,"").replace(/\s*```$/,"");
+  try{return JSON.parse(s)}catch(_){}
+  const a=s.indexOf("{"),b=s.lastIndexOf("}");
+  if(a>=0&&b>a){try{return JSON.parse(s.slice(a,b+1))}catch(_){}}
+  return null;
+}
+function normalizeResults(raw){
+  return raw.map((r,i)=>({
+    model:state.models[state.selected.findIndex((v,j)=>v&&j>=0)]?.name || "Model",
+    id:"",
+    text:"",
+    error:""
+  }));
+}
+function buildJudgePrompt(userPrompt,answers,mode,dossier=""){
+  const packed=answers.map((a,i)=>`MODEL ${i+1}: ${a.name}\nRESPONSE:\n${compactText(a.text||"[FAILED: "+a.error+"]",3000)}`).join("\n\n---\n\n");
+  const evidence=dossier?`\n\nCOMPACT DOCUMENT EVIDENCE DOSSIER:\n${dossier}`:"";
+  return `USER QUESTION:\n${userPrompt}\n\nMODE: ${mode}${evidence}\n\nBelow are independent model responses. Evaluate them as evidence, not as votes.\n${packed}\n\nReturn ONLY valid JSON:\n{"winner":"short name of best option/recommendation","final_answer":"clear final answer for the user","confidence":0,"consensus":0,"scores":[{"model":"name","accuracy":0,"evidence":0,"relevance":0,"reasoning":0,"completeness":0,"overall":0}],"consensus_points":["..."],"disagreements":["..."],"best_arguments":["..."],"caveats":["..."]}\n\nRules:\n- confidence and consensus are integers 0-100.\n- Score each model response from 0-100.\n- Prefer exact evidence from the document dossier and user requirements.\n- Do not reward a model merely for agreeing with the majority.\n- Never invent facts.\n- If evidence is insufficient, say so.\n- If a choice is requested, make one clear recommendation when possible.`;
+}
+function runtimeModel(id, index=0){
+  if(state.safeBudget && !isFreeModel(id)) return freeFallbackFor(index);
+  return id;
+}
+async function judge(userPrompt, answers, dossier=""){
+  const sys=`You are the FINAL JUDGE of an AI Council. You are independent, skeptical and evidence-focused.
+You must synthesize competing responses, detect contradictions and produce the most useful answer.
+Never claim that consensus proves truth. Never invent evidence.`;
+  const text=await callModel(runtimeModel(state.judge,0),buildJudgePrompt(userPrompt,answers,state.mode,dossier),sys,state.mode==="deep"?420:300,{fallbackIndex:0});
+  return extractJson(text)||{
+    winner:"No reliable winner",
+    final_answer:text||"Judge returned no usable answer.",
+    confidence:50,consensus:50,scores:[],consensus_points:[],disagreements:["Judge response was not valid JSON."],best_arguments:[],caveats:[]
+  };
+}
+async function devil(userPrompt,verdict){
+  const sys=`You are the Devil's Advocate for an AI decision system.
+Your job is to try to falsify the preliminary recommendation.
+Find serious errors, unsupported assumptions, overlooked alternatives or cases where the recommendation fails.
+If the recommendation is robust, say why. Do not invent facts.`;
+  const p=`USER QUESTION:
+${compactText(userPrompt,5000)}
+
+PRELIMINARY VERDICT:
+${compactText(JSON.stringify(verdict),7000)}
+
+Return ONLY JSON:
+{"challenge":"...","severity":"low|medium|high","should_reconsider":true,"reason":"..."}`;
+  const text=await callModel(runtimeModel(state.critic,1),p,sys,220,{fallbackIndex:1});
+  return extractJson(text)||{challenge:text||"No challenge returned.",severity:"medium",should_reconsider:false,reason:""};
+}
+function scoreMap(scores){
+  const map={}; (scores||[]).forEach(s=>map[(s.model||"").toLowerCase()]=s);
+  return map;
+}
+function renderVerdict(v,crit){
+  const sev=crit?.severity||"low";
+  $("verdictCard").innerHTML=`
+    <div class="sectiontitle"><h3>🏆 FINAL VERDICT</h3><span class="pill">${esc(state.mode.toUpperCase())}</span></div>
+    <div class="winner">${esc(v.winner||"No clear winner")}</div>
+    <div class="confidence">Confidence: <b>${Number(v.confidence||0)}%</b> · Council consensus: <b>${Number(v.consensus||0)}%</b></div>
+    <div class="pills"><span class="pill">7-model style council</span><span class="pill">Judge: ${esc(state.judge)}</span><span class="pill">Critic: ${esc(state.critic)}</span></div>
+    <hr>
+    <div style="white-space:pre-wrap;line-height:1.55">${esc(v.final_answer||"")}</div>
+    ${listBlock("Why the council agrees",v.consensus_points)}
+    ${listBlock("Strongest arguments",v.best_arguments)}
+    ${listBlock("Caveats",v.caveats)}
+  `;
+  $("debateCard").innerHTML=`
+    <div class="sectiontitle"><h3>🛡️ Devil's Advocate</h3><span class="pill">${esc(sev.toUpperCase())} risk</span></div>
+    <div style="line-height:1.55">${esc(crit.challenge||"No challenge.")}</div>
+    <div class="small" style="margin-top:8px">${crit.should_reconsider?"⚠️ The preliminary recommendation should be reconsidered.":"✅ No critical reason to overturn the recommendation."} ${esc(crit.reason||"")}</div>
+  `;
+}
+function listBlock(title,items){
+  if(!Array.isArray(items)||!items.length)return "";
+  return `<hr><div style="font-weight:800;margin-bottom:7px">${esc(title)}</div><ul style="margin-top:0">${items.slice(0,8).map(x=>`<li style="margin:5px 0">${esc(x)}</li>`).join("")}</ul>`;
+}
+function renderAnswers(answers,v){
+  const sm=scoreMap(v.scores);
+  $("answers").innerHTML=answers.map(a=>{
+    const s=sm[(a.name||"").toLowerCase()]||{};
+    return `<div class="answer">
+      <div class="answerhead"><div><b>${esc(a.name)}</b><div class="small">${esc(a.id)}</div></div><div class="score">${s.overall!=null?esc(s.overall)+"/100":"—"}</div></div>
+      <div class="answerbody">${esc(a.error?"ERROR: "+a.error:a.text)}</div>
+    </div>`;
+  }).join("");
+}
+function saveRun(prompt,v,crit,answers){
+  const hist=JSON.parse(localStorage.getItem("ac_history")||"[]");
+  hist.unshift({id:Date.now(),prompt,v,crit,answers:answers.map(a=>({name:a.name,id:a.id,text:a.text,error:a.error})),mode:state.mode});
+  localStorage.setItem("ac_history",JSON.stringify(hist.slice(0,30)));
+  renderHistory();
+}
+function renderHistory(){
+  const h=JSON.parse(localStorage.getItem("ac_history")||"[]");
+  $("history").innerHTML=h.length?h.map(x=>`<div class="historyitem"><button data-h="${x.id}"><b>${esc(x.prompt.slice(0,110))}</b><div class="small">${new Date(x.id).toLocaleString()} · ${esc(x.mode)} · ${esc(x.v?.winner||"No winner")}</div></button></div>`).join(""):`<div class="small">No saved runs yet.</div>`;
+  $("history").querySelectorAll("button").forEach(b=>b.onclick=()=>loadHistory(+b.dataset.h));
+}
+function loadHistory(id){
+  const h=JSON.parse(localStorage.getItem("ac_history")||"[]"); const x=h.find(z=>z.id===id); if(!x)return;
+  $("prompt").value=x.prompt;state.mode=x.mode||"quick";
+  document.querySelectorAll(".mode").forEach(m=>m.classList.toggle("active",m.dataset.mode===state.mode));
+  $("results").classList.remove("hidden");renderVerdict(x.v,x.crit);renderAnswers(x.answers,x.v);window.scrollTo({top:0,behavior:"smooth"});
+}
+async function extractPdfText(file){
+  if(!file) return {text:"",pages:[]};
+  if(file.type !== "application/pdf") throw new Error("Please select a PDF file.");
+  if(file.size > 60 * 1024 * 1024) throw new Error("PDF is larger than 60 MB. Split it into smaller PDFs on your phone.");
+  if(!window.pdfjsLib) await new Promise(r=>setTimeout(r,700));
+  if(!window.pdfjsLib) throw new Error("PDF reader is still loading. Try again in a moment.");
+  const buf=await file.arrayBuffer();
+  const pdf=await window.pdfjsLib.getDocument({data:buf}).promise;
+  const pages=[]; let all="";
+  for(let n=1;n<=pdf.numPages;n++){
+    const page=await pdf.getPage(n);
+    const content=await page.getTextContent();
+    const line=content.items.map(x=>x.str||"").join(" ").replace(/\s+/g," ").trim();
+    pages.push({page:n,text:line});
+    all+=`\n\n--- PAGE ${n} ---\n${line}`;
+    if(n%10===0) setProgress(Math.min(18,2+Math.round(n/pdf.numPages*16)),`Reading PDF pages: ${n}/${pdf.numPages}...`);
+  }
+  return {text:all.trim(),pages};
+}
+
+function chunkPages(pages,maxChars=12000,overlapChars=500){
+  const chunks=[]; let current="",startPage=1,endPage=1;
+  for(const p of pages){
+    if(!p.text) continue;
+    const block=`--- PAGE ${p.page} ---\n${p.text}`;
+    if(current && current.length+block.length+2>maxChars){
+      chunks.push({text:current.trim(),startPage,endPage});
+      current=current.slice(Math.max(0,current.length-overlapChars))+"\n\n"+block;
+      startPage=Math.max(1,endPage);
+    }else current+=(current?"\n\n":"")+block;
+    endPage=p.page;
+  }
+  if(current.trim()) chunks.push({text:current.trim(),startPage,endPage});
+  return chunks;
+}
+function compactText(s,maxChars){
+  s=String(s||"").replace(/\s+/g," ").trim();
+  return s.length>maxChars?s.slice(0,maxChars)+"…":s;
+}
+async function scanDocument(userQuestion,pages){
+  const chunks=chunkPages(pages,12000,500);
+  if(!chunks.length) throw new Error("No selectable text was found. This may be a scanned/image-only PDF; OCR is required.");
+  const tasks=chunks.map((chunk,i)=>async()=>{
+    const sys=`You are the document scanner inside an AI Council. Extract evidence, not the final answer. Be extremely compact. Preserve exact problem-statement numbers, names, requirements, costs, constraints, dates and decision-critical facts. Ignore decorative text.`;
+    const prompt=`USER TASK:\n${userQuestion}\n\nDOCUMENT CHUNK ${i+1}/${chunks.length} (pages ${chunk.startPage}-${chunk.endPage}):\n${chunk.text}\n\nReturn ONLY a compact evidence list, maximum 450 words. Include page numbers for important facts. Do not invent anything.`;
+    try{
+      const t=await callModel(runtimeModel(state.docModel,i),prompt,sys,240,{fallbackIndex:i});
+      return `CHUNK ${i+1} · pages ${chunk.startPage}-${chunk.endPage}\n${compactText(t,3000)}`;
+    }catch(e){
+      return `CHUNK ${i+1} · pages ${chunk.startPage}-${chunk.endPage}\n[Scanner error: ${e.message}]`;
+    }
+  });
+  const raw=await parallelLimit(tasks,1);
+  const evidence=raw.map((x,i)=>x||`CHUNK ${i+1}\n[No scanner result]`);
+  setProgress(48,`Document scan complete: ${chunks.length} chunks processed.`);
+  let dossier=evidence.join("\n\n---\n\n");
+  if(dossier.length>18000) dossier=dossier.slice(0,18000)+"\n\n[Evidence dossier clipped to a safe size.]";
+  return {dossier,chunks:chunks.length};
+}
+
+async function ask(){
+  if(state.running)return;
+  const userPrompt=$("prompt").value.trim();
+  const pdf=$("pdfFile").files[0];
+  if(!userPrompt && !pdf)return toast("Enter a prompt or attach a PDF.");
+  if(!getKey())return openSettings("Add your OpenRouter API key first.");
+  const indexes=state.models.map((_,i)=>i).filter(i=>state.selected[i]);
+  if(indexes.length<2)return toast("Select at least 2 models.");
+
+  state.running=true;$("askBtn").disabled=true;$("results").classList.add("hidden");
+  const started=performance.now(); let dossier="";
+  try{
+    if(pdf){
+      $("pdfStatus").textContent="Reading PDF...";
+      setProgress(2,"Opening PDF...");
+      const extracted=await extractPdfText(pdf);
+      state.pdfText=extracted.text;state.pdfPages=extracted.pages;state.pdfName=pdf.name;
+      $("pdfStatus").textContent=`Attached: ${pdf.name} · ${extracted.pages.length} pages · ${extracted.text.length.toLocaleString()} characters`;
+      const scan=await scanDocument(userPrompt||"Analyze this document and identify the most decision-relevant information.",extracted.pages);
+      dossier=scan.dossier;
+      $("pdfStatus").textContent+=` · ${scan.chunks} safe chunks scanned`;
+    }
+
+    let councilPrompt=userPrompt||"Analyze the attached document and give the best actionable conclusion.";
+    if(dossier) councilPrompt=`${userPrompt||"Analyze the attached document."}\n\nIMPORTANT: A large PDF was pre-scanned by a dedicated document scanner. Use ONLY the compact evidence dossier below as the document source. Do not assume missing facts.\n\nDOCUMENT EVIDENCE DOSSIER:\n${dossier}`;
+
+    setProgress(pdf?50:5,"Starting independent council analysis...");
+    const chosen=indexes.map(i=>state.models[i]);let completed=0;
+    const tasks=chosen.map((m,pos)=>async()=>{
+      const actual=runtimeModel(m.id,pos);
+      const sys=modelSystem(state.mode,m.role||"Independent analyst")+"\nFor document tasks, keep the answer compact: identify the strongest candidates, cite supplied page numbers, and avoid repeating the document.";
+      try{
+        const result=await callModel(actual,councilPrompt,sys,state.mode==="deep"?380:260,{fallbackIndex:pos});
+        completed++;setProgress((pdf?50:5)+Math.round(completed/chosen.length*25),`Independent responses: ${completed}/${chosen.length}`);
+        return {name:m.name,id:result.model,text:result.text,originalId:m.id};
+      }catch(e){
+        completed++;setProgress((pdf?50:5)+Math.round(completed/chosen.length*25),`Independent responses: ${completed}/${chosen.length}`);
+        return {name:m.name,id:actual,text:"",error:e.message,originalId:m.id};
+      }
+    });
+    const raw=await parallelLimit(tasks,1);
+    const answers=raw.map((r,i)=>({...chosen[i],...(r||{}),text:r?.text||"",error:r?.error||"",id:r?.id||chosen[i].id}));
+    const good=answers.filter(a=>a.text&&!a.error);
+    if(!good.length)throw new Error("No model returned a usable response. Your OpenRouter balance may be too low for the selected models. Try free/low-cost models in Settings or add credits.");
+
+    setProgress(77,"Judge is comparing compact evidence...");
+    let v;
+    try{v=await judge(userPrompt||"Analyze the document",good,dossier)}catch(e){
+      // Last-resort local synthesis: the app still produces a useful result
+      // instead of displaying a total system failure.
+      const names=good.map(a=>a.name).join(", ");
+      v={
+        winner:"Human review required",
+        final_answer:"The council models returned usable analyses, but the final judge was unavailable. Review the model responses below. Models that completed: "+names+"\n\nJudge error: "+e.message,
+        confidence:25,consensus:0,scores:[],consensus_points:["Judge unavailable; no AI final vote was made."],
+        disagreements:[e.message],best_arguments:good.slice(0,4).map(a=>a.name+": "+compactText(a.text,450)),
+        caveats:["This is not a final AI judge verdict."]
+      };
+    }
+    setProgress(88,"Devil's Advocate is stress-testing the verdict...");
+    let crit={challenge:"Skipped",severity:"low",should_reconsider:false,reason:""};
+    try{crit=await devil(userPrompt||"Analyze the document",v)}catch(e){
+      crit={challenge:"Critic unavailable: "+e.message,severity:"low",should_reconsider:false,reason:"The final result was not overturned because the critic did not run."}
+    }
+    if(crit.should_reconsider){
+      setProgress(94,"Recommendation challenged; preserving judge verdict and showing the challenge...");
+      // Budget-safe behavior: do NOT make a second full judge call. The critic's
+      // challenge is displayed as a required human review point instead.
+      v.caveats=Array.isArray(v.caveats)?v.caveats.slice(0,6):[];
+      v.caveats.unshift("Devil's Advocate challenged the preliminary recommendation: "+compactText(crit.challenge,700));
+      v.confidence=Math.max(0,Number(v.confidence||50)-10);
+    }
+    const finalPrompt=userPrompt||`Analyze PDF: ${state.pdfName}`;
+    state.last={prompt:finalPrompt,v,crit,answers};
+    $("results").classList.remove("hidden");renderVerdict(v,crit);renderAnswers(answers,v);saveRun(finalPrompt,v,crit,answers);
+    const sec=((performance.now()-started)/1000).toFixed(1);
+    $("elapsed").textContent=sec+"s";$("status").textContent="Council finished.";setProgress(100,"Final verdict ready.",false);
+    toast(`ULTRA complete · ${sec}s`);
+  }catch(e){
+    $("status").textContent="Run failed.";setProgress(100,"Failed: "+e.message,false);toast(e.message);
+  }finally{
+    state.running=false;$("askBtn").disabled=false;
+  }
+}
+function openSettings(msg){
+  $("settingsModal").classList.remove("hidden"); if(msg)toast(msg);
+}
+async function refreshCatalog(){
+  const key=getKey(); if(!key){$("catalogStatus").textContent="Add a key first.";return}
+  $("catalogStatus").textContent="Loading model catalog...";
+  try{
+    const r=await fetch(MODELS_URL,{headers:{Authorization:"Bearer "+key}});
+    const d=await r.json();
+    if(!r.ok)throw new Error(d?.error?.message||"HTTP "+r.status);
+    const catalog=(d.data||[]).filter(x=>x.id).sort((a,b)=>a.id.localeCompare(b.id));
+    window.__catalog=catalog;
+    $("catalogStatus").textContent=`Loaded ${catalog.length} models. Custom slugs can be pasted below.`;
+    toast("Model catalog refreshed.");
+  }catch(e){$("catalogStatus").textContent="Could not load catalog: "+e.message}
+}
+$("pdfFile").onchange=()=>{
+  const f=$("pdfFile").files[0];
+  $("pdfStatus").textContent=f?`Selected: ${f.name} · will be analyzed when you press ASK THE COUNCIL.`:"No PDF attached.";
+};
+$("askBtn").onclick=ask;
+$("clearBtn").onclick=()=>{$("prompt").value="";$("pdfFile").value="";$("pdfStatus").textContent="No PDF attached.";state.pdfText="";state.pdfName="";state.pdfPages=[];$("results").classList.add("hidden");resetProgress()};
+$("settingsBtn").onclick=()=>openSettings();
+$("closeSettings").onclick=()=>$("settingsModal").classList.add("hidden");
+$("saveSettings").onclick=()=>{
+  setKey($("apiKey").value,$("saveKey").checked);
+  state.judge=$("judgeModel").value||state.judge;state.critic=$("criticModel").value||state.critic;state.docModel=$("docModel").value||state.docModel;state.safeBudget=$("safeBudget").checked;
+  const extra=$("customModels").value.split(/\n|,/).map(x=>x.trim()).filter(Boolean);
+  for(const id of extra)if(!state.models.some(m=>m.id===id))state.models.push({id,name:id.split("/").pop(),role:"Custom model"});
+  state.selected=state.models.map((_,i)=>state.selected[i]!==false);
+  saveSettingsLocal();renderModels();populateSelects();$("settingsModal").classList.add("hidden");toast("Settings saved.");
+};
+$("loadModels").onclick=refreshCatalog;
+$("clearHistory").onclick=()=>{localStorage.removeItem("ac_history");renderHistory();toast("History cleared.")};
+$("copyAll").onclick=async()=>{
+  if(!state.last)return;
+  const x=state.last;const txt=`AI COUNCIL\nPROMPT: ${x.prompt}\n\nFINAL VERDICT: ${x.v.winner}\nCONFIDENCE: ${x.v.confidence}%\n\n${x.v.final_answer}\n\nDEVIL'S ADVOCATE:\n${x.crit.challenge}\n\nMODEL RESPONSES:\n${x.answers.map(a=>`--- ${a.name} ---\n${a.text||a.error}`).join("\n\n")}`;
+  await navigator.clipboard.writeText(txt);toast("Copied.");
+};
+document.querySelectorAll(".mode").forEach(b=>b.onclick=()=>{state.mode=b.dataset.mode;document.querySelectorAll(".mode").forEach(x=>x.classList.toggle("active",x===b))});
+window.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&e.key==="Enter")ask()});
+loadInitial();
+})();
+</script>
+</body>
+</html>
