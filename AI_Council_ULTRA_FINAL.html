@@ -39,8 +39,8 @@ textarea:focus,input:focus,select:focus{border-color:var(--accent)}
 .engine-checkbox{display:flex;align-items:center;justify-content:space-between;background:#09111f;padding:10px 14px;border-radius:12px;border:1px solid var(--line);font-size:13px}
 .engine-checkbox-left{display:flex;align-items:center;gap:8px}
 .engine-checkbox input{width:auto;margin:0}
-.add-engine-row{display:flex;gap:8px;margin-top:12px}
-.add-engine-row input{padding:9px 12px;font-size:12px}
+.add-engine-row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.add-engine-row input{padding:9px 12px;font-size:12px;flex:1;min-width:180px}
 .hidden{display:none!important}
 .synthesis-card{border:2px solid var(--accent2);background:#0b1b22;border-radius:16px;padding:20px;margin-top:20px}
 .synthesis-card h3{color:var(--accent2);margin-top:0}
@@ -54,7 +54,7 @@ textarea:focus,input:focus,select:focus{border-color:var(--accent)}
 <header>
   <div class="brand">
     <div class="logo">⚖️</div>
-    <div><h1>AI Mediator & Multi-Search</h1><div class="sub">Groq Powered • Unlimited Multi-Engine Integration</div></div>
+    <div><h1>AI Mediator & Multi-Search</h1><div class="sub">Dynamic Auto-Model Groq Engine • Unlimited Multi-Search</div></div>
   </div>
 </header>
 
@@ -84,22 +84,22 @@ textarea:focus,input:focus,select:focus{border-color:var(--accent)}
 
   <div class="add-engine-row">
     <input type="text" id="newEngineName" placeholder="Engine Name (e.g. Bing)">
-    <input type="text" id="newEngineUrl" placeholder="Search URL with query parameter (e.g. https://www.bing.com/search?q=)">
+    <input type="text" id="newEngineUrl" placeholder="Search URL (e.g. https://www.bing.com/search?q=)">
     <button class="secondary" id="addEngineBtn" style="white-space:nowrap;">+ Add Engine</button>
   </div>
 </div>
 
 <div class="card">
-  <label for="groqModel">SELECT GROQ MODEL (100% FREE)</label>
-  <select id="groqModel" style="margin-bottom: 12px;">
-    <option value="llama-3.3-70b-versatile" selected>Llama 3.3 70B Versatile (Recommended)</option>
-    <option value="mixtral-8x7b-32768">Mixtral 8x7b (Large Context)</option>
-    <option value="gemma2-9b-it">Gemma 2 9B</option>
-  </select>
-
   <label for="apiKey">FREE GROQ API KEY</label>
   <input type="password" id="apiKey" placeholder="gsk_...">
   <a href="https://console.groq.com/keys" target="_blank" class="helper-link">👉 Click here to get a 100% Free Groq API Key (No credit card required)</a>
+
+  <div style="margin-top:14px;">
+    <label for="groqModel">SELECT ACTIVE GROQ MODEL (AUTO-FETCHED)</label>
+    <select id="groqModel">
+      <option value="">Paste API Key above to load active models...</option>
+    </select>
+  </div>
 </div>
 
 <!-- FINAL RESULTS DISPLAY -->
@@ -123,7 +123,7 @@ let attachedFileContent = "";
 
 const $ = id => document.getElementById(id);
 
-// Default Unlimited Engines state
+// Unlimited Search Engines Setup
 const defaultEngines = [
   { id: 'google', name: 'Google Search', url: 'https://www.google.com/search?q=', enabled: true },
   { id: 'perplexity', name: 'Perplexity AI', url: 'https://www.perplexity.ai/search?q=', enabled: true },
@@ -176,7 +176,7 @@ function toast(msg){
   window.__toast = setTimeout(() => $("toast").classList.add("hidden"), 3000);
 }
 
-// Add New Engine Dynamically
+// Add New Unlimited Engines
 $("addEngineBtn").onclick = () => {
   const name = $("newEngineName").value.trim();
   const url = $("newEngineUrl").value.trim();
@@ -212,6 +212,38 @@ function openSearchTabs() {
   });
 
   if (openedCount === 0) toast("Select at least one search engine checkbox.");
+}
+
+// Auto Fetch Available Models from user's Groq Account
+async function fetchActiveModels() {
+  const apiKey = $("apiKey").value.trim();
+  if (!apiKey) return;
+
+  const select = $("groqModel");
+  select.innerHTML = "<option value=''>Fetching available models from Groq...</option>";
+
+  try {
+    const res = await fetch("https://api.groq.com/openai/v1/models", {
+      method: "GET",
+      headers: { "Authorization": `Bearer ${apiKey}` }
+    });
+    
+    const data = await res.json();
+    if (data.data && Array.isArray(data.data)) {
+      select.innerHTML = "";
+      data.data.forEach(m => {
+        const option = document.createElement("option");
+        option.value = m.id;
+        option.textContent = m.id;
+        select.appendChild(option);
+      });
+      toast("Loaded active models for your Groq account!");
+    } else {
+      select.innerHTML = "<option value=''>Invalid Key or Failed to load models</option>";
+    }
+  } catch (err) {
+    select.innerHTML = "<option value=''>Error fetching active models</option>";
+  }
 }
 
 // Extract PDF text directly in-browser
@@ -256,11 +288,10 @@ async function runMediator() {
   if (!rawQuery) return toast("Please enter your prompt first.");
   
   const apiKey = $("apiKey").value.trim();
-  if (!apiKey) {
-    return toast("Please paste your free Groq API key below.");
-  }
+  if (!apiKey) return toast("Please paste your free Groq API key below.");
 
   const selectedModel = $("groqModel").value;
+  if (!selectedModel) return toast("Please select an active model from the dropdown.");
 
   $("synthesisResult").classList.remove("hidden");
   $("synthesisText").textContent = `📡 Processing request via Groq (${selectedModel})...`;
@@ -316,12 +347,18 @@ $("clearBtn").onclick = () => {
   $("synthesisResult").classList.add("hidden");
 };
 
-// Load saved key from localStorage
+// Load saved key from localStorage & dynamic model fetching
 $("apiKey").value = localStorage.getItem("free_groq_key") || "";
-$("apiKey").onchange = e => localStorage.setItem("free_groq_key", e.target.value.trim());
+$("apiKey").onchange = e => {
+  localStorage.setItem("free_groq_key", e.target.value.trim());
+  fetchActiveModels();
+};
 
-// Initialize engines list
+// Initial setup
 renderEngines();
+if ($("apiKey").value.trim()) {
+  fetchActiveModels();
+}
 
 })();
 </script>
