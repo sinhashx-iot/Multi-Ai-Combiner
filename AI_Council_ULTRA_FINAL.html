@@ -4,8 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#070b14">
-<title>AI Mediator & Multi-Search</title>
-<!-- Added PDF.js for native browser PDF reading -->
+<title>AI Mediator - Automated Judgment & Synthesis</title>
+<!-- PDF.js library to parse PDF text directly inside the browser -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
 <style>
 :root{
@@ -22,11 +22,10 @@ header{display:flex;align-items:center;justify-content:space-between;gap:12px;ma
 .brand{display:flex;align-items:center;gap:11px}
 .logo{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;background:linear-gradient(135deg,#7c5cff,#19d3ae);font-size:24px;box-shadow:var(--shadow)}
 h1{font-size:21px;margin:0}.sub{color:var(--muted);font-size:12px;margin-top:2px}
-.iconbtn{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:13px;padding:10px 12px}
 .card{background:rgba(14,21,36,.94);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:17px;margin-bottom:14px}
 label{display:block;font-size:12px;color:var(--muted);font-weight:700;margin:0 0 8px}
 textarea,input,select{width:100%;background:#09111f;color:var(--text);border:1px solid var(--line);border-radius:14px;outline:none;padding:13px}
-textarea{min-height:100px;resize:vertical}
+textarea{min-height:110px;resize:vertical}
 textarea:focus,input:focus,select:focus{border-color:var(--accent)}
 .file-box{margin:10px 0;display:flex;align-items:center;gap:10px}
 .file-box input[type="file"]{display:none}
@@ -37,23 +36,23 @@ textarea:focus,input:focus,select:focus{border-color:var(--accent)}
 .secondary{border:1px solid var(--line);background:#0a1220;color:#fff;border-radius:14px;padding:13px 16px}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media(max-width:760px){.grid{grid-template-columns:1fr}}
-.engines{display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto;padding-right:4px}
+.engines{display:flex;flex-direction:column;gap:8px;max-height:280px;overflow-y:auto;padding-right:4px}
 .enginerow{border:1px solid var(--line);border-radius:14px;padding:10px;background:#0a1220;display:flex;align-items:center;justify-content:space-between}
 .enginetop{display:flex;align-items:center;gap:8px;flex:1}
 .enginename{font-weight:800;font-size:13px}
 .small{font-size:11px;color:var(--muted)}
 .hidden{display:none!important}
 .sectiontitle{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.sectiontitle h3{margin:0;font-size:15px}
-.synthesis-card{border:2px solid var(--accent2);background:#0b1b22;border-radius:16px;padding:16px;margin-bottom:14px}
-.synthesis-card h3{color:var(--accent2);margin-top:0}
-.answer{border:1px solid var(--line);border-radius:15px;margin:9px 0;overflow:hidden;background:#0a1220;padding:12px}
-.answerhead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.synthesis-card{border:2px solid var(--accent2);background:#0b1b22;border-radius:16px;padding:18px;margin-bottom:14px}
+.synthesis-card h3{color:var(--accent2);margin-top:0;display:flex;align-items:center;gap:8px}
+.synth-body{line-height:1.6;font-size:14px;white-space:pre-wrap}
+.answer{border:1px solid var(--line);border-radius:15px;margin:9px 0;background:#0a1220;padding:14px}
+.answerhead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;font-weight:bold;color:var(--accent)}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:14px;z-index:50}
 .modalbox{width:min(600px,100%);max-height:90vh;overflow:auto;background:#0c1423;border:1px solid var(--line);border-radius:22px;padding:18px}
 .modalhead{display:flex;justify-content:space-between;align-items:center}.modalhead h2{margin:0}
 hr{border:0;border-top:1px solid var(--line);margin:15px 0}
 .toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#111b2d;border:1px solid var(--line);padding:10px 14px;border-radius:12px;z-index:100;font-size:12px}
-.launch-btn{background:var(--accent);border:none;color:#fff;border-radius:8px;padding:6px 12px;font-weight:bold;font-size:12px;text-decoration:none}
 .del-btn{background:none;border:none;color:var(--danger);font-size:14px;cursor:pointer}
 </style>
 </head>
@@ -62,24 +61,22 @@ hr{border:0;border-top:1px solid var(--line);margin:15px 0}
 <header>
   <div class="brand">
     <div class="logo">⚖️</div>
-    <div><h1>AI Mediator & Multi-Search</h1><div class="sub">Unlimited Engine Routing • Automated Result Synthesis</div></div>
+    <div><h1>AI Mediator App</h1><div class="sub">Direct Multi-Engine Evaluation & Automated Judgment</div></div>
   </div>
-  <button class="iconbtn" id="settingsBtn">⚙️ Engine & API Settings</button>
 </header>
 
 <div class="card">
-  <label for="prompt">ENTER PROMPT OR QUESTION</label>
-  <textarea id="prompt" placeholder="Ask a question or enter research prompt..."></textarea>
+  <label for="prompt">ENTER PROMPT OR HACKATHON QUESTION</label>
+  <textarea id="prompt" placeholder="Analyze problem statements..."></textarea>
 
   <div class="file-box">
-    <label for="fileInput" class="file-label">📎 Attach File / PDF / Image</label>
+    <label for="fileInput" class="file-label">📎 Attach PDF / Text File</label>
     <input type="file" id="fileInput" accept="image/*,.txt,.md,.json,.csv,.pdf">
     <span class="file-preview" id="fileName">No file attached</span>
   </div>
 
   <div class="actions">
     <button class="primary" id="mediatorBtn">🧠 RUN MEDIATOR (QUERY ALL & EVALUATE)</button>
-    <button class="secondary" id="launchAllBtn">🚀 Open Engines Direct</button>
     <button class="secondary" id="clearBtn">Clear</button>
   </div>
 </div>
@@ -87,46 +84,47 @@ hr{border:0;border-top:1px solid var(--line);margin:15px 0}
 <div class="grid">
   <div class="card">
     <div class="sectiontitle">
-      <h3>🔎 Configured Engines (<span id="engineCount">0</span>)</h3>
-      <button class="secondary" id="addEngineBtn">+ Add Engine</button>
+      <h3>🔎 Configured AI Models (<span id="engineCount">0</span>)</h3>
+      <button class="secondary" id="addEngineBtn">+ Add Model</button>
     </div>
     <div class="engines" id="engines"></div>
   </div>
 
   <div class="card">
-    <div class="sectiontitle"><h3>⚙️ Direct API Setup (Optional)</h3></div>
-    <label for="apiKey">OPENROUTER / DIRECT API KEY (For Auto-Mediator Synthesis)</label>
+    <div class="sectiontitle"><h3>⚙️ API Key Requirement</h3></div>
+    <label for="apiKey">OPENROUTER API KEY (Required for direct retrieval)</label>
     <input type="password" id="apiKey" placeholder="sk-or-v1-...">
-    <div class="small" style="margin-top:6px;">Provide an OpenRouter API key to automatically query and aggregate outputs across AI models. If omitted, launching direct search tabs is used automatically.</div>
+    <div class="small" style="margin-top:6px;">An API key is required to query engines in background tabs without CORS errors. Get one for free at OpenRouter.ai.</div>
   </div>
 </div>
 
+<!-- MEDIATOR FINAL RESULT -->
 <section id="synthesisResult" class="hidden">
   <div class="synthesis-card">
-    <h3>🏆 MEDIATOR SYNTHESIS (BEST EVALUATED RESULT)</h3>
-    <div id="synthesisText">Analyzing engine outputs...</div>
+    <h3>🏆 FINAL MEDIATOR JUDGMENT</h3>
+    <div class="synth-body" id="synthesisText">Analyzing outputs from selected AI engines...</div>
   </div>
 </section>
 
+<!-- INDIVIDUAL ENGINE RESPONSES -->
 <section id="results" class="hidden">
   <div class="card">
-    <div class="sectiontitle"><h3>📊 Individual Engine Outputs & Links</h3></div>
-    <div id="linksContainer"></div>
+    <div class="sectiontitle"><h3>📊 Raw Outputs from Analyzed AI Engines</h3></div>
+    <div id="responsesContainer"></div>
   </div>
 </section>
 </div>
 
-<!-- Modal: Add Search Engine -->
+<!-- Modal: Add Custom Model -->
 <div class="modal hidden" id="addModal">
  <div class="modalbox">
-  <div class="modalhead"><h2>➕ Add Engine / AI Model</h2><button class="iconbtn" id="closeAddModal">✕</button></div>
+  <div class="modalhead"><h2>➕ Add Custom AI Engine</h2><button class="iconbtn" id="closeAddModal">✕</button></div>
   <hr>
-  <label for="newEngineName">ENGINE NAME</label>
-  <input type="text" id="newEngineName" placeholder="e.g. Custom Search, Perplexity, OpenRouter Model ID">
+  <label for="newEngineName">ENGINE DISPLAY NAME</label>
+  <input type="text" id="newEngineName" placeholder="e.g. DeepSeek R1, Claude 3.5">
   <br><br>
-  <label for="newEngineUri">URL PATTERN OR API MODEL ID</label>
-  <input type="text" id="newEngineUri" placeholder="e.g. https://example.com/search?q={query} OR google/gemini-2.5-pro">
-  <div class="small" style="margin-top:4px;">Use <code>{query}</code> as placeholder for search web engines.</div>
+  <label for="newEngineModel">OPENROUTER MODEL ID</label>
+  <input type="text" id="newEngineModel" placeholder="e.g. deepseek/deepseek-r1, anthropic/claude-3.5-sonnet">
   <br>
   <button class="primary" id="saveEngineBtn">Save Engine</button>
  </div>
@@ -138,22 +136,20 @@ hr{border:0;border-top:1px solid var(--line);margin:15px 0}
 (() => {
 "use strict";
 
-if (window.pdfjsLib) {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
-}
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.worker.min.js';
 
 const DEFAULT_ENGINES = [
-  { id: "google", name: "Google", uri: "https://www.google.com/search?q={query}", modelId: "google/gemini-2.5-flash" },
-  { id: "perplexity", name: "Perplexity AI", uri: "https://www.perplexity.ai/search?q={query}", modelId: "perplexity/sonar" },
-  { id: "duckduckgo", name: "DuckDuckGo", uri: "https://duckduckgo.com/?q={query}", modelId: "meta-llama/llama-3.3-70b-instruct" },
-  { id: "openai", name: "ChatGPT / OpenAI", uri: "https://chatgpt.com/?q={query}", modelId: "openai/gpt-4o-mini" }
+  { id: "gemini", name: "Google Gemini 2.5", modelId: "google/gemini-2.5-flash" },
+  { id: "perplexity", name: "Perplexity Sonar", modelId: "perplexity/sonar" },
+  { id: "llama", name: "Meta Llama 3.3 70B", modelId: "meta-llama/llama-3.3-70b-instruct" },
+  { id: "gpt4", name: "ChatGPT (GPT-4o Mini)", modelId: "openai/gpt-4o-mini" }
 ];
 
 let attachedFileContent = "";
 
 const state = {
-  engines: JSON.parse(localStorage.getItem("med_engines")) || DEFAULT_ENGINES,
-  selected: JSON.parse(localStorage.getItem("med_selected")) || DEFAULT_ENGINES.map(() => true),
+  engines: JSON.parse(localStorage.getItem("med_engines_v2")) || DEFAULT_ENGINES,
+  selected: JSON.parse(localStorage.getItem("med_selected_v2")) || DEFAULT_ENGINES.map(() => true),
   apiKey: localStorage.getItem("med_apikey") || ""
 };
 
@@ -164,45 +160,39 @@ function toast(msg){
   $("toast").textContent = msg;
   $("toast").classList.remove("hidden");
   clearTimeout(window.__toast);
-  window.__toast = setTimeout(() => $("toast").classList.add("hidden"), 2800);
+  window.__toast = setTimeout(() => $("toast").classList.add("hidden"), 3000);
 }
 
-// File Attachment Handler with PDF Support
+// Client-side PDF & File Parsing
 $("fileInput").onchange = async e => {
   const file = e.target.files[0];
   if (!file) return;
-  $("fileName").textContent = file.name + " (Processing...)";
   
-  try {
-    if (file.type === "application/pdf" || file.name.endsWith(".pdf")) {
+  $("fileName").textContent = file.name + " (Reading...)";
+
+  if (file.type === "application/pdf" || file.name.endsWith(".pdf")) {
+    try {
       const arrayBuffer = await file.arrayBuffer();
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-      let fullText = "";
-      for (let i = 1; i <= Math.min(pdf.numPages, 10); i++) { // Parse up to first 10 pages
+      let text = "";
+      for (let i = 1; i <= Math.min(pdf.numPages, 10); i++) {
         const page = await pdf.getPage(i);
-        const textContent = await page.getTextContent();
-        fullText += textContent.items.map(item => item.str).join(" ") + "\n";
+        const content = await page.getTextContent();
+        text += content.items.map(item => item.str).join(" ") + "\n";
       }
-      attachedFileContent = `\n[Attached PDF Text (${file.name}):\n${fullText.slice(0, 4000)}\n]`;
-      $("fileName").textContent = file.name + " (PDF Loaded)";
-    } else if (file.type.startsWith("image/")) {
-      const reader = new FileReader();
-      reader.onload = () => { 
-        attachedFileContent = `\n[Attached Image Data Preview: ${reader.result.slice(0, 100)}...]`; 
-        $("fileName").textContent = file.name;
-      };
-      reader.readAsDataURL(file);
-    } else {
-      const reader = new FileReader();
-      reader.onload = () => { 
-        attachedFileContent = `\n[Attached File Context (${file.name}):\n${reader.result.slice(0, 4000)}\n]`; 
-        $("fileName").textContent = file.name;
-      };
-      reader.readAsText(file);
+      attachedFileContent = `\n[PDF Attachment Content (${file.name}):\n${text}\n]`;
+      $("fileName").textContent = file.name + " (Parsed successfully)";
+    } catch (err) {
+      toast("Error parsing PDF file.");
+      $("fileName").textContent = "Failed to load PDF";
     }
-  } catch(err) {
-    toast("Error reading file: " + err.message);
-    $("fileName").textContent = file.name + " (Failed)";
+  } else {
+    const reader = new FileReader();
+    reader.onload = () => {
+      attachedFileContent = `\n[Attachment Content (${file.name}):\n${reader.result}\n]`;
+      $("fileName").textContent = file.name + " (Loaded)";
+    };
+    reader.readAsText(file);
   }
 };
 
@@ -238,87 +228,67 @@ function renderEngines(){
 }
 
 function saveState(){
-  localStorage.setItem("med_engines", JSON.stringify(state.engines));
-  localStorage.setItem("med_selected", JSON.stringify(state.selected));
+  localStorage.setItem("med_engines_v2", JSON.stringify(state.engines));
+  localStorage.setItem("med_selected_v2", JSON.stringify(state.selected));
 }
 
-// Direct Web Launch
-function launchDirect(){
-  const rawQuery = $("prompt").value.trim();
-  if (!rawQuery) return toast("Enter a prompt first.");
-  
-  const fullPrompt = rawQuery + attachedFileContent;
-  const encoded = encodeURIComponent(fullPrompt);
-
-  const container = $("linksContainer");
-  container.innerHTML = "";
-
-  state.engines.forEach((engine, idx) => {
-    if (!state.selected[idx]) return;
-    const url = engine.uri.includes("{query}") ? engine.uri.replace("{query}", encoded) : engine.uri + encoded;
-    
-    const div = document.createElement("div");
-    div.className = "answer";
-    div.innerHTML = `
-      <div class="answerhead">
-        <div><b>${esc(engine.name)}</b></div>
-        <a href="${url}" target="_blank" rel="noopener noreferrer" class="launch-btn">Open</a>
-      </div>
-      <div class="small">${esc(url)}</div>`;
-    container.appendChild(div);
-  });
-
-  $("results").classList.remove("hidden");
-  toast("Generated engine search links.");
-}
-
-// Mediator & AI Synthesis Mode
+// Core Mediator Logic
 async function runMediator(){
   const rawQuery = $("prompt").value.trim();
-  if (!rawQuery) return toast("Enter a prompt first.");
-
+  if (!rawQuery) return toast("Enter your prompt first.");
+  
   const apiKey = $("apiKey").value.trim();
-  const activeEngines = state.engines.filter((_, idx) => state.selected[idx]);
-
-  if (activeEngines.length === 0) return toast("Select at least one engine.");
-
-  launchDirect();
-
   if (!apiKey) {
-    toast("No API Key provided. Opened direct search tabs below!");
-    return;
+    return toast("Please enter an OpenRouter API key to query engines directly!");
   }
 
+  const activeEngines = state.engines.filter((_, idx) => state.selected[idx]);
+  if (activeEngines.length === 0) return toast("Select at least one AI engine.");
+
   $("synthesisResult").classList.remove("hidden");
-  $("synthesisText").textContent = "📡 Querying selected AI models concurrently...";
+  $("results").classList.remove("hidden");
+  $("synthesisText").textContent = "📡 Sending query concurrently to all selected AI engines...";
+
+  const responsesContainer = $("responsesContainer");
+  responsesContainer.innerHTML = "";
 
   const fullQuery = rawQuery + attachedFileContent;
 
   try {
+    // 1. Concurrent queries to all enabled engines
     const enginePromises = activeEngines.map(async (eng) => {
-      const model = eng.modelId || "google/gemini-2.5-flash";
-      const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${apiKey}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          model: model,
-          messages: [{ role: "user", content: fullQuery }]
-        })
-      });
-      const data = await res.json();
-      return {
-        name: eng.name,
-        output: data.choices?.[0]?.message?.content || "No response received."
-      };
+      try {
+        const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${apiKey}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            model: eng.modelId,
+            messages: [{ role: "user", content: fullQuery }]
+          })
+        });
+        const data = await res.json();
+        const text = data.choices?.[0]?.message?.content || "No output returned.";
+        
+        // Render engine answer into UI dynamically
+        const div = document.createElement("div");
+        div.className = "answer";
+        div.innerHTML = `<div class="answerhead">${esc(eng.name)}</div><div style="white-space:pre-wrap;font-size:13px">${esc(text)}</div>`;
+        responsesContainer.appendChild(div);
+
+        return { name: eng.name, output: text };
+      } catch(err) {
+        return { name: eng.name, output: "Error: " + err.message };
+      }
     });
 
     const results = await Promise.all(enginePromises);
 
-    $("synthesisText").textContent = "⚖️ Mediator evaluating responses for accuracy...";
+    $("synthesisText").textContent = "⚖️ Mediator is analyzing all responses to select the best outcome...";
 
+    // 2. Synthesize all answers into a single Final Judgement
     const synthRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -326,25 +296,27 @@ async function runMediator(){
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-pro",
+        model: "google/gemini-2.5-flash",
         messages: [{
           role: "user",
-          content: `You are an AI Mediator. Review these outputs from different AI engines for the user query: "${fullQuery}"\n\n` +
-            results.map(r => `--- ENGINE: ${r.name} ---\n${r.output}\n`).join("\n") +
-            `\nSynthesize and select the single best, most accurate, comprehensive answer out of them.`
+          content: `You are the Lead Hackathon AI Mediator. Analyze the original user request and evaluate the responses provided by multiple AI engines below.\n\n` +
+            `USER REQUEST:\n${fullQuery}\n\n` +
+            `ENGINE RESPONSES:\n` +
+            results.map(r => `=== ${r.name} ===\n${r.output}\n`).join("\n") +
+            `\nTASK: Compare all responses, eliminate hallucinated or weak choices, and deliver the final best judgment answer directly to the user on this screen. Structure your response clearly.`
         }]
       })
     });
 
     const synthData = await synthRes.json();
-    $("synthesisText").innerHTML = esc(synthData.choices?.[0]?.message?.content || "Failed mediator synthesis.").replace(/\n/g, "<br>");
+    $("synthesisText").textContent = synthData.choices?.[0]?.message?.content || "Mediator evaluation complete.";
 
   } catch (err) {
-    $("synthesisText").textContent = "Error executing synthesis: " + err.message;
+    $("synthesisText").textContent = "Execution Error: " + err.message;
   }
 }
 
-$("launchAllBtn").onclick = launchDirect;
+// Action Handlers
 $("mediatorBtn").onclick = runMediator;
 $("clearBtn").onclick = () => {
   $("prompt").value = "";
@@ -360,18 +332,18 @@ $("closeAddModal").onclick = () => $("addModal").classList.add("hidden");
 
 $("saveEngineBtn").onclick = () => {
   const name = $("newEngineName").value.trim();
-  const uri = $("newEngineUri").value.trim();
-  if (!name || !uri) return toast("Fill in both fields.");
+  const modelId = $("newEngineModel").value.trim();
+  if (!name || !modelId) return toast("Fill in both fields.");
 
-  state.engines.push({ id: Date.now().toString(), name, uri, modelId: uri });
+  state.engines.push({ id: Date.now().toString(), name, modelId });
   state.selected.push(true);
   saveState();
   renderEngines();
   
   $("newEngineName").value = "";
-  $("newEngineUri").value = "";
+  $("newEngineModel").value = "";
   $("addModal").classList.add("hidden");
-  toast("Engine added!");
+  toast("Model added successfully!");
 };
 
 $("apiKey").value = state.apiKey;
