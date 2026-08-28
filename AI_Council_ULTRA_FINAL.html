@@ -1,10 +1,13 @@
+
+
+
 <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#070b14">
-<title>AI Council ULTRA - Multi-Search Launcher</title>
+<title>AI Mediator & Multi-Engine Hub</title>
 <style>
 :root{
   --bg:#070b14;--panel:#0e1524;--panel2:#121c2f;--text:#eef4ff;--muted:#93a4bd;
@@ -12,7 +15,7 @@
   --shadow:0 16px 45px rgba(0,0,0,.32);--radius:20px
 }
 *{box-sizing:border-box}
-body{margin:0;background:radial-gradient(circle at 20% -10%,#18234b 0,transparent 35%),var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+body{margin:0;background:radial-gradient(circle at 20% -10%,#18234b 0,transparent 35%),var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,sans-serif}
 button,input,textarea,select{font:inherit}
 button{cursor:pointer}
 .app{max-width:1100px;margin:auto;padding:18px 14px 50px}
@@ -24,97 +27,109 @@ h1{font-size:21px;margin:0}.sub{color:var(--muted);font-size:12px;margin-top:2px
 .card{background:rgba(14,21,36,.94);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:17px;margin-bottom:14px}
 label{display:block;font-size:12px;color:var(--muted);font-weight:700;margin:0 0 8px}
 textarea,input,select{width:100%;background:#09111f;color:var(--text);border:1px solid var(--line);border-radius:14px;outline:none;padding:13px}
-textarea{min-height:110px;resize:vertical}
+textarea{min-height:100px;resize:vertical}
 textarea:focus,input:focus,select:focus{border-color:var(--accent)}
-.modes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}
-.mode{padding:11px;border:1px solid var(--line);background:#0a1220;color:var(--muted);border-radius:14px;text-align:center}
-.mode.active{background:rgba(124,92,255,.16);border-color:var(--accent);color:#fff}
-.actions{display:flex;gap:9px;flex-wrap:wrap}
+.file-box{margin:10px 0;display:flex;align-items:center;gap:10px}
+.file-box input[type="file"]{display:none}
+.file-label{border:1px dashed var(--line);padding:10px 14px;border-radius:12px;cursor:pointer;background:#09111f;font-size:12px;color:var(--muted)}
+.file-preview{font-size:12px;color:var(--accent2)}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}
 .primary{border:0;background:linear-gradient(135deg,#7c5cff,#6045df);color:#fff;border-radius:14px;padding:13px 18px;font-weight:800;flex:1;min-width:180px}
 .secondary{border:1px solid var(--line);background:#0a1220;color:#fff;border-radius:14px;padding:13px 16px}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-@media(max-width:760px){.grid{grid-template-columns:1fr}.modes{grid-template-columns:1fr 1fr 1fr}}
-.engines{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-.enginerow{border:1px solid var(--line);border-radius:14px;padding:10px;background:#0a1220;display:flex;align-items:center;justify-content:space-between}
-.enginetop{display:flex;align-items:center;gap:8px}
+@media(max-width:760px){.grid{grid-template-columns:1fr}}
+.engines{display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto;padding-right:4px}
+.enginerow{border:1px solid var(--line);border-radius:14px;padding:10px;background:#0a1220;display:flex;align-items:center;justify-space-between:space-between}
+.enginetop{display:flex;align-items:center;gap:8px;flex:1}
 .enginename{font-weight:800;font-size:13px}
 .small{font-size:11px;color:var(--muted)}
 .hidden{display:none!important}
-.pills{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}
-.pill{border:1px solid var(--line);border-radius:999px;padding:6px 9px;font-size:11px;color:var(--muted)}
 .sectiontitle{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.sectiontitle h3{margin:0;font-size:15px}
+.synthesis-card{border:2px solid var(--accent2);background:#0b1b22;border-radius:16px;padding:16px;margin-bottom:14px}
+.synthesis-card h3{color:var(--accent2);margin-top:0}
 .answer{border:1px solid var(--line);border-radius:15px;margin:9px 0;overflow:hidden;background:#0a1220;padding:12px}
 .answerhead{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
-.historyitem{border:1px solid var(--line);border-radius:13px;padding:11px;margin:7px 0;background:#0a1220}
-.historyitem button{background:none;border:0;color:#fff;text-align:left;width:100%}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.68);display:flex;align-items:flex-end;justify-content:center;padding:10px;z-index:50}
-.modalbox{width:min(700px,100%);max-height:90vh;overflow:auto;background:#0c1423;border:1px solid var(--line);border-radius:22px;padding:17px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:14px;z-index:50}
+.modalbox{width:min(600px,100%);max-height:90vh;overflow:auto;background:#0c1423;border:1px solid var(--line);border-radius:22px;padding:18px}
 .modalhead{display:flex;justify-content:space-between;align-items:center}.modalhead h2{margin:0}
 hr{border:0;border-top:1px solid var(--line);margin:15px 0}
-.notice{font-size:11px;line-height:1.5;color:#9fb0c9}
-footer{text-align:center;color:#667894;font-size:10px;padding:12px}
-.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#111b2d;border:1px solid var(--line);padding:10px 14px;border-radius:12px;z-index:100;box-shadow:var(--shadow);font-size:12px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:#111b2d;border:1px solid var(--line);padding:10px 14px;border-radius:12px;z-index:100;font-size:12px}
 .launch-btn{background:var(--accent);border:none;color:#fff;border-radius:8px;padding:6px 12px;font-weight:bold;font-size:12px;text-decoration:none}
+.del-btn{background:none;border:none;color:var(--danger);font-size:14px;cursor:pointer}
 </style>
 </head>
 <body>
 <div class="app">
 <header>
   <div class="brand">
-    <div class="logo">🔍</div>
-    <div><h1>AI Multi-Search Hub</h1><div class="sub">Personal Phone-Engine Launcher • Accurate Queries</div></div>
+    <div class="logo">⚖️</div>
+    <div><h1>AI Mediator & Multi-Search</h1><div class="sub">Unlimited Engine Routing • Automated Result Synthesis</div></div>
   </div>
-  <button class="iconbtn" id="settingsBtn">⚙️</button>
+  <button class="iconbtn" id="settingsBtn">⚙️ Engine & API Settings</button>
 </header>
 
 <div class="card">
-  <label for="prompt">YOUR SEARCH QUERY / TOPIC</label>
-  <textarea id="prompt" placeholder="Example: Best laptops under $1000 for programming..."></textarea>
+  <label for="prompt">ENTER PROMPT OR QUESTION</label>
+  <textarea id="prompt" placeholder="Ask a question or enter research prompt..."></textarea>
 
-  <div class="modes">
-    <button class="mode active" data-mode="exact">🎯 Exact</button>
-    <button class="mode" data-mode="deep">🔬 Deep Search</button>
-    <button class="mode" data-mode="verdict">🏆 Review Focus</button>
+  <div class="file-box">
+    <label for="fileInput" class="file-label">📎 Attach File / Image</label>
+    <input type="file" id="fileInput" accept="image/*,.txt,.md,.json,.csv">
+    <span class="file-preview" id="fileName">No file attached</span>
   </div>
 
   <div class="actions">
-    <button class="primary" id="searchAllBtn">🚀 OPEN ALL SELECTED ENGINES</button>
+    <button class="primary" id="mediatorBtn">🧠 RUN MEDIATOR (QUERY ALL & EVALUATE)</button>
+    <button class="secondary" id="launchAllBtn">🚀 Open Engines Direct</button>
     <button class="secondary" id="clearBtn">Clear</button>
   </div>
 </div>
 
 <div class="grid">
   <div class="card">
-    <div class="sectiontitle"><h3>🔎 Active Engines</h3><span class="small" id="engineCount">0 selected</span></div>
+    <div class="sectiontitle">
+      <h3>🔎 Configured Engines (<span id="engineCount">0</span>)</h3>
+      <button class="secondary" id="addEngineBtn">+ Add Engine</button>
+    </div>
     <div class="engines" id="engines"></div>
   </div>
 
   <div class="card">
-    <div class="sectiontitle"><h3>⚡ Quick Actions</h3></div>
-    <div class="notice">Clicking "OPEN ALL" will trigger your phone to open each selected search provider or installed native app. If pop-ups are blocked, allow pop-ups for this page.</div>
+    <div class="sectiontitle"><h3>⚙️ Direct API Setup (Optional)</h3></div>
+    <label for="apiKey">OPENROUTER / DIRECT API KEY (For Auto-Mediator Synthesis)</label>
+    <input type="password" id="apiKey" placeholder="sk-or-v1-...">
+    <div class="small" style="margin-top:6px;">If an API key is provided, the mediator will fetch parallel responses from all checked engines and automatically pick/synthesize the best result.</div>
   </div>
 </div>
 
-<section id="results" class="hidden">
-  <div class="card">
-    <div class="sectiontitle"><h3>📊 Launch Links & Specific Queries</h3></div>
-    <div id="linksContainer"></div>
+<section id="synthesisResult" class="hidden">
+  <div class="synthesis-card">
+    <h3>🏆 MEDIATOR SYNTHESIS (BEST EVALUATED RESULT)</h3>
+    <div id="synthesisText">Analyzing engine outputs...</div>
   </div>
 </section>
 
-<div class="card">
-  <div class="sectiontitle"><h3>🕘 Recent Searches</h3><button class="secondary" id="clearHistory">Clear</button></div>
-  <div id="history"></div>
+<section id="results" class="hidden">
+  <div class="card">
+    <div class="sectiontitle"><h3>📊 Individual Engine Outputs & Links</h3></div>
+    <div id="linksContainer"></div>
+  </div>
+</section>
 </div>
 
-<footer>Personal Multi-Search Hub. Launches directly to mobile apps via deep links or default browser protocols.</footer>
-</div>
-
-<div class="modal hidden" id="settingsModal">
+<!-- Modal: Add Search Engine -->
+<div class="modal hidden" id="addModal">
  <div class="modalbox">
-  <div class="modalhead"><h2>⚙️ Search Settings</h2><button class="iconbtn" id="closeSettings">✕</button></div>
+  <div class="modalhead"><h2>➕ Add Engine / AI Model</h2><button class="iconbtn" id="closeAddModal">✕</button></div>
   <hr>
-  <div class="notice">Select search engines to include by default. Make sure your browser settings allow opening multiple tabs/external apps.</div>
+  <label for="newEngineName">ENGINE NAME</label>
+  <input type="text" id="newEngineName" placeholder="e.g. Custom Search, Perplexity, OpenRouter Model ID">
+  <br><br>
+  <label for="newEngineUri">URL PATTERN OR API MODEL ID</label>
+  <input type="text" id="newEngineUri" placeholder="e.g. https://example.com/search?q={query} OR google/gemini-2.5-pro">
+  <div class="small" style="margin-top:4px;">Use <code>{query}</code> as placeholder for search web engines.</div>
+  <br>
+  <button class="primary" id="saveEngineBtn">Save Engine</button>
  </div>
 </div>
 
@@ -124,20 +139,19 @@ footer{text-align:center;color:#667894;font-size:10px;padding:12px}
 (() => {
 "use strict";
 
-const SEARCH_ENGINES = [
-  { id: "google", name: "Google", uri: "https://www.google.com/search?q=" },
-  { id: "duckduckgo", name: "DuckDuckGo", uri: "https://duckduckgo.com/?q=" },
-  { id: "bing", name: "Bing", uri: "https://www.bing.com/search?q=" },
-  { id: "perplexity", name: "Perplexity AI", uri: "https://www.perplexity.ai/search?q=" },
-  { id: "brave", name: "Brave Search", uri: "https://search.brave.com/search?q=" },
-  { id: "ecosia", name: "Ecosia", uri: "https://www.ecosia.org/search?q=" },
-  { id: "yahoo", name: "Yahoo", uri: "https://search.yahoo.com/search?p=" }
+const DEFAULT_ENGINES = [
+  { id: "google", name: "Google", uri: "https://www.google.com/search?q={query}", modelId: "google/gemini-2.5-flash" },
+  { id: "perplexity", name: "Perplexity AI", uri: "https://www.perplexity.ai/search?q={query}", modelId: "perplexity/sonar" },
+  { id: "duckduckgo", name: "DuckDuckGo", uri: "https://duckduckgo.com/?q={query}", modelId: "meta-llama/llama-3.3-70b-instruct" },
+  { id: "openai", name: "ChatGPT / OpenAI", uri: "https://chatgpt.com/?q={query}", modelId: "openai/gpt-4o-mini" }
 ];
 
+let attachedFileContent = "";
+
 const state = {
-  mode: "exact",
-  engines: JSON.parse(localStorage.getItem("msh_engines") || "null") || SEARCH_ENGINES,
-  selected: JSON.parse(localStorage.getItem("msh_selected") || "null") || SEARCH_ENGINES.map(() => true)
+  engines: JSON.parse(localStorage.getItem("med_engines")) || DEFAULT_ENGINES,
+  selected: JSON.parse(localStorage.getItem("med_selected")) || DEFAULT_ENGINES.map(() => true),
+  apiKey: localStorage.getItem("med_apikey") || ""
 };
 
 const $ = id => document.getElementById(id);
@@ -150,130 +164,199 @@ function toast(msg){
   window.__toast = setTimeout(() => $("toast").classList.add("hidden"), 2800);
 }
 
+// File Attachment Handler
+$("fileInput").onchange = e => {
+  const file = e.target.files[0];
+  if (!file) return;
+  $("fileName").textContent = file.name;
+  
+  const reader = new FileReader();
+  if (file.type.startsWith("image/")) {
+    reader.onload = () => { attachedFileContent = `\n[Attached Image Data: ${reader.result.slice(0, 100)}...]`; };
+    reader.readAsDataURL(file);
+  } else {
+    reader.onload = () => { attachedFileContent = `\n[Attached File Context (${file.name}):\n${reader.result}\n]`; };
+    reader.readAsText(file);
+  }
+};
+
 function renderEngines(){
-  const box = $("engines"); 
+  const box = $("engines");
   box.innerHTML = "";
   state.engines.forEach((e, i) => {
-    const row = document.createElement("div"); 
+    const row = document.createElement("div");
     row.className = "enginerow";
     row.innerHTML = `
       <div class="enginetop">
         <input type="checkbox" data-i="${i}" ${state.selected[i] ? "checked" : ""}>
         <span class="enginename">${esc(e.name)}</span>
-      </div>`;
+      </div>
+      <button class="del-btn" data-del="${i}">🗑️</button>`;
     box.appendChild(row);
   });
 
-  box.querySelectorAll("input").forEach(x => x.onchange = () => {
+  box.querySelectorAll("input[type='checkbox']").forEach(x => x.onchange = () => {
     state.selected[+x.dataset.i] = x.checked;
-    localStorage.setItem("msh_selected", JSON.stringify(state.selected));
-    updateCount();
+    saveState();
   });
-  updateCount();
+
+  box.querySelectorAll(".del-btn").forEach(b => b.onclick = () => {
+    const idx = +b.dataset.del;
+    state.engines.splice(idx, 1);
+    state.selected.splice(idx, 1);
+    saveState();
+    renderEngines();
+  });
+
+  $("engineCount").textContent = state.engines.length;
 }
 
-function updateCount(){ 
-  $("engineCount").textContent = state.selected.filter(Boolean).length + " selected"; 
+function saveState(){
+  localStorage.setItem("med_engines", JSON.stringify(state.engines));
+  localStorage.setItem("med_selected", JSON.stringify(state.selected));
 }
 
-function formatQuery(query, mode) {
-  let q = query.trim();
-  if (mode === "deep") {
-    return `${q} in-depth analysis OR research OR documentation`;
-  } else if (mode === "verdict") {
-    return `${q} reviews OR comparisons OR benchmarks`;
-  }
-  return q;
-}
-
-function executeSearch() {
+// Direct Web Launch
+function launchDirect(){
   const rawQuery = $("prompt").value.trim();
-  if (!rawQuery) return toast("Please enter a query first.");
+  if (!rawQuery) return toast("Enter a prompt first.");
+  
+  const fullPrompt = rawQuery + attachedFileContent;
+  const encoded = encodeURIComponent(fullPrompt);
 
-  const formattedQuery = formatQuery(rawQuery, state.mode);
-  const encodedQuery = encodeURIComponent(formattedQuery);
-  const activeIndices = state.selected.map((val, idx) => val ? idx : -1).filter(idx => idx !== -1);
+  const container = $("linksContainer");
+  container.innerHTML = "";
 
-  if (activeIndices.length === 0) return toast("Select at least one search engine.");
-
-  const linksContainer = $("linksContainer");
-  linksContainer.innerHTML = "";
-
-  activeIndices.forEach((idx, i) => {
-    const engine = state.engines[idx];
-    const targetUrl = engine.uri + encodedQuery;
-
-    // Create action block in UI
+  state.engines.forEach((engine, idx) => {
+    if (!state.selected[idx]) return;
+    const url = engine.uri.includes("{query}") ? engine.uri.replace("{query}", encoded) : engine.uri + encoded;
+    
     const div = document.createElement("div");
     div.className = "answer";
     div.innerHTML = `
       <div class="answerhead">
         <div><b>${esc(engine.name)}</b></div>
-        <a href="${targetUrl}" target="_blank" rel="noopener noreferrer" class="launch-btn">Open</a>
+        <a href="${url}" target="_blank" rel="noopener noreferrer" class="launch-btn">Open</a>
       </div>
-      <div class="small">${esc(targetUrl)}</div>
-    `;
-    linksContainer.appendChild(div);
-
-    // Open first in current window or delay others to bypass browser popup blocks
-    if (i === 0) {
-      window.open(targetUrl, '_blank');
-    } else {
-      setTimeout(() => {
-        window.open(targetUrl, '_blank');
-      }, i * 400);
-    }
+      <div class="small">${esc(url)}</div>`;
+    container.appendChild(div);
   });
 
   $("results").classList.remove("hidden");
-  saveRun(rawQuery);
-  toast(`Opening ${activeIndices.length} search engine(s)...`);
+  toast("Generated launch links.");
 }
 
-function saveRun(query){
-  const hist = JSON.parse(localStorage.getItem("msh_history") || "[]");
-  hist.unshift({ id: Date.now(), query, mode: state.mode });
-  localStorage.setItem("msh_history", JSON.stringify(hist.slice(0, 20)));
-  renderHistory();
-}
-
-function renderHistory(){
-  const h = JSON.parse(localStorage.getItem("msh_history") || "[]");
-  $("history").innerHTML = h.length 
-    ? h.map(x => `<div class="historyitem"><button data-q="${esc(x.query)}"><b>${esc(x.query)}</b><div class="small">${new Date(x.id).toLocaleString()} · Mode: ${esc(x.mode)}</div></button></div>`).join("")
-    : `<div class="small">No search history.</div>`;
+// Mediator & AI Synthesis Mode
+async function runMediator(){
+  const rawQuery = $("prompt").value.trim();
+  if (!rawQuery) return toast("Enter a prompt first.");
   
-  $("history").querySelectorAll("button").forEach(b => b.onclick = () => {
-    $("prompt").value = b.dataset.q;
-    executeSearch();
-  });
+  const apiKey = $("apiKey").value.trim();
+  const activeEngines = state.engines.filter((_, idx) => state.selected[idx]);
+
+  if (activeEngines.length === 0) return toast("Select at least one engine.");
+
+  launchDirect();
+
+  if (!apiKey) {
+    toast("Opening tabs... Add OpenRouter API key for auto-synthesis result!");
+    return;
+  }
+
+  $("synthesisResult").classList.remove("hidden");
+  $("synthesisText").textContent = "📡 Querying selected AI engines concurrently...";
+
+  const fullQuery = rawQuery + (attachedFileContent ? `\nContext File: ${attachedFileContent}` : "");
+
+  try {
+    const enginePromises = activeEngines.map(async (eng) => {
+      const model = eng.modelId || "google/gemini-2.5-flash";
+      const res = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${apiKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          model: model,
+          messages: [{ role: "user", content: fullQuery }]
+        })
+      });
+      const data = await res.json();
+      return {
+        name: eng.name,
+        output: data.choices?.[0]?.message?.content || "No response received."
+      };
+    });
+
+    const results = await Promise.all(enginePromises);
+
+    $("synthesisText").textContent = "⚖️ Mediator evaluating responses for accuracy...";
+
+    // Mediator Evaluation Call
+    const synthRes = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: "google/gemini-2.5-pro",
+        messages: [{
+          role: "user",
+          content: `You are an AI Mediator. Review these outputs from different AI engines for the user query: "${fullQuery}"\n\n` +
+            results.map(r => `--- ENGINE: ${r.name} ---\n${r.output}\n`).join("\n") +
+            `\nSynthesize and select the single best, most accurate, comprehensive answer out of them.`
+        }]
+      })
+    });
+
+    const synthData = await synthRes.json();
+    $("synthesisText").innerHTML = esc(synthData.choices?.[0]?.message?.content || "Failed mediator synthesis.").replace(/\n/g, "<br>");
+
+  } catch (err) {
+    $("synthesisText").textContent = "Error executing synthesis: " + err.message;
+  }
 }
 
-$("searchAllBtn").onclick = executeSearch;
+// Event Bindings
+$("launchAllBtn").onclick = launchDirect;
+$("mediatorBtn").onclick = runMediator;
 $("clearBtn").onclick = () => {
   $("prompt").value = "";
+  $("fileInput").value = "";
+  $("fileName").textContent = "No file attached";
+  attachedFileContent = "";
   $("results").classList.add("hidden");
-};
-$("settingsBtn").onclick = () => $("settingsModal").classList.remove("hidden");
-$("closeSettings").onclick = () => $("settingsModal").classList.add("hidden");
-$("clearHistory").onclick = () => {
-  localStorage.removeItem("msh_history");
-  renderHistory();
-  toast("History cleared.");
+  $("synthesisResult").classList.add("hidden");
 };
 
-document.querySelectorAll(".mode").forEach(b => b.onclick = () => {
-  state.mode = b.dataset.mode;
-  document.querySelectorAll(".mode").forEach(x => x.classList.toggle("active", x === b));
-});
+$("addEngineBtn").onclick = () => $("addModal").classList.remove("hidden");
+$("closeAddModal").onclick = () => $("addModal").classList.add("hidden");
 
-window.addEventListener("keydown", e => {
-  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") executeSearch();
-});
+$("saveEngineBtn").onclick = () => {
+  const name = $("newEngineName").value.trim();
+  const uri = $("newEngineUri").value.trim();
+  if (!name || !uri) return toast("Fill in both fields.");
+
+  state.engines.push({ id: Date.now().toString(), name, uri, modelId: uri });
+  state.selected.push(true);
+  saveState();
+  renderEngines();
+  
+  $("newEngineName").value = "";
+  $("newEngineUri").value = "";
+  $("addModal").classList.add("hidden");
+  toast("Engine added!");
+};
+
+$("apiKey").value = state.apiKey;
+$("apiKey").onchange = e => localStorage.setItem("med_apikey", e.target.value.trim());
 
 renderEngines();
-renderHistory();
 })();
 </script>
 </body>
 </html>
+
+```
