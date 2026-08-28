@@ -137,7 +137,7 @@ $("fileInput").onchange = async e => {
   }
 };
 
-// Execute Direct AI Analysis using the updated gemini-2.5-flash endpoint
+// Execute Direct AI Analysis using the correct gemini-2.5-flash endpoint
 async function runMediator() {
   const rawQuery = $("prompt").value.trim();
   if (!rawQuery) return toast("Please enter your prompt first.");
